@@ -1,5 +1,6 @@
 class ApplicationController < ActionController::Base
   force_ssl if: :ssl_configured?
+  before_filter :check_adobe
 
   protect_from_forgery with: :null_session, only: Proc.new { |c| c.request.format.json? }
 
@@ -35,6 +36,14 @@ class ApplicationController < ActionController::Base
       format.srt  { render :text => 'not found', :status => :not_found }
     end
 
+  end
+
+  def check_adobe
+    if params[:adobe] == "true"
+      session[:adobe] = true
+    elsif params[:adobe] == "false"
+      session[:adobe] = false
+    end
   end
 
   private
