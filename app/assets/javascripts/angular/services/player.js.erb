@@ -9,7 +9,8 @@
   }
 
   angular.module('ngPlayer', ['ngPlayerHater', 'ngSanitize'])
-  .factory('Player', ['playerHater', '$rootScope', function (playerHater, $rootScope) {
+  .factory('Player', ['playerHater', '$rootScope', '$window', function (playerHater, $rootScope, $window) {
+    var adobe = $window.adobe;
     var Player = {};
 
     var waveformData = [];
@@ -83,6 +84,9 @@
     };
 
     Player.seekTo = function (position) {
+      if (adobe) {
+        cs.evalScript("app.activeDocument.setSelection(app.activeDocument.sampleRate * "+position+",0)");
+      }
       return playerHater.seekTo(position * 1000);
     };
 
