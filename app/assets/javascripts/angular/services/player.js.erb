@@ -7,6 +7,17 @@
       return event;
     }
   }
+  function secsForPPRO(secs) {
+    var hours   = Math.floor(secs / 3600);
+    var minutes = Math.floor((secs - (hours * 3600)) / 60);
+    var seconds = secs - (hours * 3600) - (minutes * 60);
+
+    if (hours   < 10) {hours   = "0"+hours;}
+    if (minutes < 10) {minutes = "0"+minutes;}
+    if (seconds < 10) {seconds = "0"+seconds;}
+    var time    = hours + ';' + minutes + ';' + seconds + ";00";
+    return time;
+}
 
   angular.module('ngPlayer', ['ngPlayerHater', 'ngSanitize'])
   .factory('Player', ['playerHater', '$rootScope', '$window', function (playerHater, $rootScope, $window) {
@@ -85,7 +96,20 @@
 
     Player.seekTo = function (position) {
       if (adobe) {
-        cs.evalScript("app.activeDocument.setSelection(app.activeDocument.sampleRate * "+position+",0)");
+        var appName = cs.hostEnvironment.appName;
+        console.log(appName);
+        if (appName === "AUDT") {
+        cs.evalScript("app.activeDocument.setSelection(app.activeDocument.sampleRate * "+position+",0)");  
+        } else if (appName === "PPRO") {
+          console.log(position);
+          console.log(secsForPPRO(parseInt(position, 10)));
+          var newPosition = "qe.source.player.scrubTo('"+secsForPPRO(parseInt(position))+"')";
+          console.log(newPosition);
+          cs.evalScript("app.enableQE()");
+          cs.evalScript("qe.source.player.startScrubbing()");
+          cs.evalScript(newPosition);
+          cs.evalScript("qe.source.player.endScrubbing()");
+        }
       }
       return playerHater.seekTo(position * 1000);
     };
