@@ -61,7 +61,6 @@ angular.module("Directory.audioFiles.controllers", ['ngPlayer'])
   $scope.$on('transcriptSeek', function(event, time) {
     event.stopPropagation();
     $scope.play();
-    console.log(time);
     $scope.player.seekTo(time);
   });
 

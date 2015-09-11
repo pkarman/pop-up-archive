@@ -11,21 +11,22 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150819144413) do
+ActiveRecord::Schema.define(version: 20150819163026) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
   enable_extension "hstore"
+  enable_extension "pg_stat_statements"
 
   create_table "active_admin_comments", force: :cascade do |t|
-    t.string   "namespace"
+    t.string   "namespace",     limit: 255
     t.text     "body"
-    t.string   "resource_id",   null: false
-    t.string   "resource_type", null: false
+    t.string   "resource_id",   limit: 255, null: false
+    t.string   "resource_type", limit: 255, null: false
     t.integer  "author_id"
-    t.string   "author_type"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.string   "author_type",   limit: 255
+    t.datetime "created_at",                null: false
+    t.datetime "updated_at",                null: false
   end
 
   add_index "active_admin_comments", ["author_type", "author_id"], name: "index_active_admin_comments_on_author_type_and_author_id", using: :btree
@@ -45,8 +46,8 @@ ActiveRecord::Schema.define(version: 20150819144413) do
     t.integer  "size",              limit: 8
     t.integer  "storage_id"
     t.string   "path",              limit: 255
-    t.datetime "transcoded_at"
     t.integer  "duration"
+    t.datetime "transcoded_at"
     t.boolean  "metered"
     t.integer  "user_id"
     t.integer  "listens",                       default: 0, null: false
@@ -68,6 +69,8 @@ ActiveRecord::Schema.define(version: 20150819144413) do
     t.datetime "updated_at"
   end
 
+  add_index "charges", ["ref_id"], name: "index_charges_on_ref_id", using: :btree
+
   create_table "collection_grants", force: :cascade do |t|
     t.integer  "collection_id"
     t.integer  "collector_id"
@@ -80,7 +83,6 @@ ActiveRecord::Schema.define(version: 20150819144413) do
 
   add_index "collection_grants", ["collection_id", "collector_id", "collector_type"], name: "index_collection_grant_collector_type_collection", unique: true, using: :btree
   add_index "collection_grants", ["collection_id"], name: "index_collection_grants_on_collection_id", using: :btree
-  add_index "collection_grants", ["collector_id", "collection_id"], name: "index_collection_grants_on_user_id_and_collection_id", unique: true, using: :btree
   add_index "collection_grants", ["collector_id"], name: "index_collection_grants_on_user_id", using: :btree
 
   create_table "collections", force: :cascade do |t|
@@ -94,7 +96,7 @@ ActiveRecord::Schema.define(version: 20150819144413) do
     t.integer  "upload_storage_id"
     t.datetime "deleted_at"
     t.integer  "creator_id"
-    t.string   "token"
+    t.string   "token",                    limit: 255
   end
 
   create_table "contributions", force: :cascade do |t|
@@ -168,7 +170,7 @@ ActiveRecord::Schema.define(version: 20150819144413) do
     t.string   "original_file_url", limit: 255
     t.string   "storage_id",        limit: 255
     t.integer  "imageable_id"
-    t.string   "imageable_type"
+    t.string   "imageable_type",    limit: 255
   end
 
   add_index "image_files", ["imageable_id"], name: "index_image_files_on_imageable_id", using: :btree
@@ -212,6 +214,7 @@ ActiveRecord::Schema.define(version: 20150819144413) do
     t.text     "music_sound_used"
     t.text     "date_peg"
     t.text     "notes"
+    t.text     "transcription"
     t.string   "tags",                                                         array: true
     t.integer  "geolocation_id"
     t.hstore   "extra",                         default: {}
@@ -222,11 +225,10 @@ ActiveRecord::Schema.define(version: 20150819144413) do
     t.string   "token",             limit: 255
     t.integer  "storage_id"
     t.boolean  "is_public"
-    t.text     "transcription"
     t.string   "language",          limit: 255
     t.datetime "deleted_at"
     t.string   "image",             limit: 255
-    t.string   "transcript_type",               default: "basic", null: false
+    t.string   "transcript_type",   limit: 255, default: "basic", null: false
   end
 
   add_index "items", ["collection_id"], name: "index_items_on_collection_id", using: :btree
@@ -243,7 +245,7 @@ ActiveRecord::Schema.define(version: 20150819144413) do
     t.decimal  "value"
     t.datetime "created_at",              null: false
     t.datetime "updated_at",              null: false
-    t.string   "yearmonth"
+    t.string   "yearmonth",   limit: 255
     t.decimal  "cost"
     t.decimal  "retail_cost"
   end
@@ -279,6 +281,7 @@ ActiveRecord::Schema.define(version: 20150819144413) do
 
   add_index "oauth_access_tokens", ["refresh_token"], name: "index_oauth_access_tokens_on_refresh_token", unique: true, using: :btree
   add_index "oauth_access_tokens", ["resource_owner_id"], name: "index_oauth_access_tokens_on_resource_owner_id", using: :btree
+  add_index "oauth_access_tokens", ["token"], name: "index_oauth_access_tokens_on_token", unique: true, using: :btree
 
   create_table "oauth_applications", force: :cascade do |t|
     t.string   "name",         limit: 255, null: false
@@ -360,10 +363,10 @@ ActiveRecord::Schema.define(version: 20150819144413) do
     t.datetime "created_at",                 null: false
     t.datetime "updated_at",                 null: false
     t.string   "stripe_plan_id", limit: 255
-    t.string   "name"
-    t.string   "amount"
-    t.string   "hours"
-    t.string   "interval"
+    t.string   "name",           limit: 255
+    t.string   "amount",         limit: 255
+    t.string   "hours",          limit: 255
+    t.string   "interval",       limit: 255
   end
 
   create_table "tasks", force: :cascade do |t|
@@ -401,13 +404,13 @@ ActiveRecord::Schema.define(version: 20150819144413) do
   add_index "timed_texts", ["transcript_id"], name: "index_timed_texts_on_transcript_id", using: :btree
 
   create_table "transcribers", force: :cascade do |t|
-    t.string   "name"
-    t.string   "url"
+    t.string   "name",                limit: 255
+    t.string   "url",                 limit: 255
     t.integer  "cost_per_min"
     t.text     "description"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.integer  "retail_cost_per_min", default: 0, null: false
+    t.datetime "created_at",                                  null: false
+    t.datetime "updated_at",                                  null: false
+    t.integer  "retail_cost_per_min",             default: 0, null: false
   end
 
   create_table "transcripts", force: :cascade do |t|
