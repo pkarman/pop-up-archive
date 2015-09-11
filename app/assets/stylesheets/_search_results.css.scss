@@ -97,8 +97,7 @@
   }
 
   .media {
-    float: left;
-    width: 85%;
+    width: 78%;
     word-wrap: break-word;
     margin-top: 4px !important;
 
@@ -200,7 +199,7 @@ h5.result-count {
   }
 }
 @media(max-width:600px) {
-    .pager {
+    .pager.top {
       li.centered {
         position: relative;
         top: 6px;

@@ -62,14 +62,14 @@ class OembedController < Api::V1::BaseController
       @chunk_size = route_action[:chunk] || 30
       @start      = route_action[:start] || 0
       @end        = route_action[:end]   || false
+      @height     = (params[:height]      || 400).to_i
+      @width      = (params[:width]       || 800).to_i
 
       # path to html (rich) template partial
       if route_action[:action] == 'iframe'
         @partial_path = "oembed/iframe.html"
       else
         @partial_path = 'oembed/tplayer.html'
-        @height     = params[:maxheight] || 400
-        @width      = params[:maxwidth]  || 400
       end
       
       # response type for tplayer

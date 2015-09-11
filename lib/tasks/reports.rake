@@ -171,7 +171,7 @@ namespace :reports do
         puts "No entity defined for #{mu.inspect}"
         next
       end
-      if !mu.entity.plan.has_premium_transcripts?
+      if mu.entity.plan.id == "premium_community"
         printf("%6d %12s %40s  %s  $%0.2f\n", mu.entity_id, mu.entity_type, mu.entity.name, mu.value_as_hms, mu.retail_cost)
         num += 1
       end
