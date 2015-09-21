@@ -318,32 +318,27 @@ $body-stack: Verdana, Arial, san-serif;
     display: none;
   }
 
-  .loading-overlay {
+  .loading-indicator {
+    text-align: center;
     z-index: 10000;
-    position: fixed;
-    width: calc(100% - 62px);
+    position: absolute;
+    width: calc(100% - 30px);
     height: 200px;
     background: rgba(0, 0, 0, 0.7);
     opacity: 1;
-    @include transition(opacity, 0.2s, ease);
-
-    .pua-tplayer-text.selected {
-      background: none;
+    transition: opacity 0.2s ease;
+    -o-transition: opacity 0.2s ease;
+    -moz-transition: opacity 0.2s ease;
+    -webkit-transition: opacity 0.2s ease;
+    @include mobile {
+      width: calc(100% + 30px);
     }
-
-    &.ui-animate {
-      opacity: 0;
-    }
-    .loading-indicator {
-      position: absolute;
-      top: 50%;
-      left: 45%;
-      margin-top: -15px;
+    .loading-text {
+      margin-top: 75px;
       width: 100%;
-      text-align:center;
       color: #fff;
       font-weight: 800; 
-      font-size: 2em; 
+      font-size: 2em;
     }
   }
 
