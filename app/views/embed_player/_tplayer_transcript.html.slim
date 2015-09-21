@@ -23,8 +23,9 @@ javascript:
           i.fa.fa-chevron-circle-down
       .tplayer.scrolling id="pua-tplayer-#{file_id}-transcript" data-file="#{file_id}" data-perm="#{audio_file.item_id.to_s(16)}"
           .hidden.loading-indicator
-            i.fa.fa-cog.fa-spin
-            |  Seeking
+            .loading-text
+              i.fa.fa-cog.fa-spin
+              |  Seeking
           .body
             - tparts = transcript.has_speaker_ids ? transcript.chunked_by_speaker : transcript.chunked_by_time(chunk_size.to_i)
             - line_num = 0; tparts.each do |tpart|
