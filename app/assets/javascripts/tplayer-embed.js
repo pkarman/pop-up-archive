@@ -7,7 +7,7 @@ requirejs.config({
   baseUrl: require.toUrl('')
 });
 
-requirejs(['jquery', 'jquery.jplayer', '//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js' ], function($) {
+requirejs(['jquery', 'jquery.jplayer', 'player', '//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js' ], function($) {
   require(['tplayer']);
   var sc = $("script");
   //console.log(sc);
