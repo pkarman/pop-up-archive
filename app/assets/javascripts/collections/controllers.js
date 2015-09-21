@@ -152,9 +152,9 @@ angular.module('Directory.collections.controllers', ['Directory.loader', 'Direct
   if (!$scope.collection) {
     $scope.collection = new Collection();
     $scope.collection.copyMedia = true;
+    $scope.collection.itemsVisibleByDefault = false;
   }
 
-  $scope.collection.itemsVisibleByDefault = false;
 
   $scope.visibilityChange = function () {
     if (!$scope.collection.itemsVisibleByDefault) {
