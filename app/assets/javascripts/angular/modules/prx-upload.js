@@ -36,6 +36,8 @@ angular.module('fileDropzone', [])
             attrs.$observe('dropzoneContent', function (text) {
                 if (typeof text !== 'undefined') {
                    scope.overlayText = text;
+                } else if (attrs.class !== "authn") {
+                    scope.overlayText = "Please log in to upload";
                 } else {
                     scope.overlayText = "Drop file here to upload.";
                 }
@@ -67,6 +69,10 @@ angular.module('fileDropzone', [])
             function _hideOverlay(e) {
                 stopEvent(e);
                 scope.$apply(function (scope) {
+                    if (attrs.class == "authn") {
+                        scope.overlayStyle.background = 'rgba(0,0,0,0.8)';
+                        scope.overlayText = 'Drop file here to upload.';
+                    }
                     scope.overlayContainerStyle.height = "0px";
                     scope.overlayVisible = false;
                 });
