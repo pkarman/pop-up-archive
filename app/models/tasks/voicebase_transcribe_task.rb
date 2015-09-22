@@ -177,7 +177,13 @@ class Tasks::VoicebaseTranscribeTask < Task
 
     # if we have no vb_name, then we never downloaded in prep for job
     elsif !self.extras['vb_name']
-      self.process()
+      begin
+        self.process()
+      rescue => err
+        logger.warn(err)
+        self.extras['error'] = err
+        cancel!
+      end
       return
 
     elsif !self.extras['job_id']
