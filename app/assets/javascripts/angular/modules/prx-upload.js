@@ -1,5 +1,5 @@
 angular.module('fileDropzone', [])
-.directive('fileDropzone', ['$compile','$parse', function ($compile, $parse) {
+.directive('fileDropzone', ['$compile','$parse', 'Me', function ($compile, $parse, Me) {
     var overlayTemplateLinker;
     function linker(scope, element, attrs) {
             var parentScope = scope,
@@ -60,6 +60,10 @@ angular.module('fileDropzone', [])
 
             function _showOverlay(e) {
                 stopEvent(e);
+                if(window.location.pathname.match(/\/items\//)) {
+                    scope.overlayStyle.background = 'rgba(100,0,0,0.8)';
+                    scope.overlayText = 'You may not add more than one file per item';
+                }
                 scope.$apply(function (scope) {
                     scope.overlayContainerStyle.height = "100%";
                     scope.overlayVisible = true;
@@ -80,14 +84,16 @@ angular.module('fileDropzone', [])
 
             function _drop(e) {
                 _hideOverlay(e);
-                var files = [];
-                angular.forEach(e.originalEvent.dataTransfer.files, function (file) {
-                    // console.log('added file', file);
-                    files.push(file);
-                });
-                scope.$apply(function (scope) {
-                    $parse(attrs.fileDropzone).assign(parentScope, files);
-                });
+                if(!window.location.pathname.match(/\/items\//)) {
+                    var files = [];
+                    angular.forEach(e.originalEvent.dataTransfer.files, function (file) {
+                        // console.log('added file', file);
+                        files.push(file);
+                    });
+                    scope.$apply(function (scope) {
+                        $parse(attrs.fileDropzone).assign(parentScope, files);
+                    });
+                }
             }
 
             function stopEvent(e) {
