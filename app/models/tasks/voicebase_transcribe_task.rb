@@ -207,6 +207,12 @@ class Tasks::VoicebaseTranscribeTask < Task
       return
     end
 
+    if vb_job.media.transcripts && vb_job.media.transcripts.latest.words.count == 0
+      self.extras['error'] = "Voicebase job empty"
+      cancel!
+      return
+    end
+
     # jobs marked 'expired' may still have a transcript. Only the audio is expired from their cache.
     if self.extras['vb_job_status'] == 'expired' or self.extras['vb_job_status'] == 'finished'
       finish!
