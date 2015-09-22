@@ -138,80 +138,38 @@ angular.module('Directory.files.controllers', ['fileDropzone', 'Directory.alerts
       var newFiles = newFiles || [];
       var newImages = newImages || [];
       $scope.initializeItem();
-      //console.log($scope);
 
-      if (($scope.item.id > 0) && (newFiles.length > 0)) {
-        if (me.canEdit($scope.item)) {
+      //console.log('handleAudioFilesAdded - add files', newFiles, $scope.item, $scope);
 
-          var uploadItem = $scope.item;
+      // set initial item transcript type based on user default
+      $scope.item.transcriptType = $scope.currentUser.defaultTranscriptType();
 
-          $q.when($scope.uploadModal).then( function (modalEl) {
-
-            var modal = modalEl;
-            //console.log('$scope.uploadModal modalEl', modal);
-
-            //console.log('$scope.uploadModal check if it is hidden');
-            if (modal.css('display') == 'none') {
-
-              //console.log('$scope.uploadModal hidden!');
-              $scope.uploadAudioFiles(uploadItem, newFiles);
-              
-            } else {
-
-              //console.log('$scope.uploadModal not hidden!');
-              uploadItem.files = uploadItem.files || [];
-              uplaodItem.images = uploadItem.images || [];
-              angular.forEach(newFiles, function (file) {
-                uploadItem.files.push(file);
-              });
-              angular.forEach(newImages, function (image) {
-                uploadItem.images.push(image);
-              });
-            }
-          });
-
-        } else {
-          $scope.addMessage({
-            'type': 'Error',
-            'title': 'Unauthorized',
-            'content': 'You don\'t have permission to edit this item; you can\'t add files to it.'
-          });
-        }
-      } else {
-
-        //console.log('handleAudioFilesAdded - add files', newFiles, $scope.item, $scope);
-
-        // set initial item transcript type based on user default
-        $scope.item.transcriptType = $scope.currentUser.defaultTranscriptType();
-
-        // add files to the item
-        if (!$scope.item.files) {
-          $scope.item.files = [];
-        }
-
-        if (!$scope.item.images) {
-          $scope.item.images = [];
-        }        
-
-        angular.forEach(newFiles, function (file) {
-          $scope.item.files.push(file);
-        });
-
-        angular.forEach(newImages, function (image){
-          $scope.item.images.push(image);
-        });
-
-        // default title to first file if not already set
-        if (newFiles.length >= 1 && (!$scope.item.title || $scope.item.title == "")) {
-          $scope.item.title = newFiles[0].name;
-        }
-
-        // all set, now show that modal!
-        $q.when($scope.uploadModal).then( function (modalEl) {
-          modalEl.show();
-        });
-        
+      // add files to the item
+      if (!$scope.item.files) {
+        $scope.item.files = [];
       }
+
+      if (!$scope.item.images) {
+        $scope.item.images = [];
+      }
+
+      angular.forEach(newFiles, function (file) {
+        $scope.item.files.push(file);
+      });
+
+      angular.forEach(newImages, function (image){
+        $scope.item.images.push(image);
+      });
+
+      // default title to first file if not already set
+      if (newFiles.length >= 1 && (!$scope.item.title || $scope.item.title == "")) {
+        $scope.item.title = newFiles[0].name;
+      }
+
+      // all set, now show that modal!
+      $q.when($scope.uploadModal).then( function (modalEl) {
+        modalEl.show();
+      });
 
       //console.log('handleAudioFilesAdded - done', $scope.item, $scope);
 
