@@ -297,7 +297,9 @@ namespace :reports do
       new_plan_id = event['data']['object']['plan']['id']
       old_plan = SubscriptionPlan.find_by_stripe_plan_id( old_plan_id ).as_cached
       new_plan = SubscriptionPlan.find_by_stripe_plan_id( new_plan_id ).as_cached
-      if new_plan.hours.to_i > old_plan.hours.to_i and new_plan.amount.to_i != 0 and !user.is_new_in_month?(now)
+      if !user
+        line = "User #{comment.resource_id} not found for ActiveAdminComment #{comment.id}. \n"
+      elsif new_plan.hours.to_i > old_plan.hours.to_i and new_plan.amount.to_i != 0 and !user.is_new_in_month?(now)
         if new_plan.interval == old_plan.interval
           prorate_charge = (new_plan.amount - old_plan.amount).fdiv(100)
         else

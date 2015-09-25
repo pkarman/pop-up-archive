@@ -177,7 +177,13 @@ class Tasks::VoicebaseTranscribeTask < Task
 
     # if we have no vb_name, then we never downloaded in prep for job
     elsif !self.extras['vb_name']
-      self.process()
+      begin
+        self.process()
+      rescue => err
+        logger.warn(err)
+        self.extras['error'] = err
+        cancel!
+      end
       return
 
     elsif !self.extras['job_id']
@@ -203,6 +209,12 @@ class Tasks::VoicebaseTranscribeTask < Task
     # cancel any rejected or failed jobs.
     if self.extras['vb_job_status'] == 'rejected' || self.extras['vb_job_status'] == "failed"
       self.extras['error'] = "Voicebase job #{self.extras['vb_job_status']}"
+      cancel!
+      return
+    end
+
+    if vb_job.media.transcripts && vb_job.media.transcripts.latest.words.count == 0
+      self.extras['error'] = "Voicebase job empty"
       cancel!
       return
     end
