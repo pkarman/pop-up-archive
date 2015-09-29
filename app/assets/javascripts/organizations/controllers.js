@@ -43,7 +43,7 @@ angular.module('Directory.organizations.controllers', ['Directory.loader', 'Dire
       //console.log(jqXHR);
       //var err = jQuery.parseJSON(jqXHR.responseText);
       //console.log(err);
-      $scope.setMemberError('There was a problem sending the invite.');
+      $scope.setMemberError('Something went wrong. Emails must correspond to users with existing Pop Up accounts.');
     });
 
   };
