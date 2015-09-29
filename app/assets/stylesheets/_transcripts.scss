@@ -15,6 +15,7 @@
 	overflow: hidden;
 
 	.file-transcript-text {
+      height: 16px;
       -webkit-marquee: auto medium infinite scroll normal;
       text-overflow: ellipsis;
 	}
@@ -70,7 +71,6 @@
   }
 
 	.file-transcript-text {
-		height: 22px;
 		overflow: hidden;
 		margin-left: 5px;
 	}
