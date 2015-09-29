@@ -60,9 +60,9 @@ angular.module('fileDropzone', [])
 
             function _showOverlay(e) {
                 stopEvent(e);
-                if(window.location.pathname.match(/\/items\//)) {
+                if(window.location.pathname.match(/\/items\//) && attrs.class == "authn") {
                     scope.overlayStyle.background = 'rgba(100,0,0,0.8)';
-                    scope.overlayText = 'You may not add more than one file per item';
+                    scope.overlayText = 'You may not drop files on Item pages';
                 }
                 scope.$apply(function (scope) {
                     scope.overlayContainerStyle.height = "100%";
