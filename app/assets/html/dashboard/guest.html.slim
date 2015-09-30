@@ -44,11 +44,33 @@
             td
               h4 Your sound, in one place, searchable to the second.
 
+
   #home-feature          
     .row
-    .col-md-12
-      #logos
-        img src="#{asset_path('home/logos-white.jpg')}"
+      .span12
+        /! Begin MailChimp Signup Form
+        #mc_embed_signup
+          form#mc-embedded-subscribe-form
+            #mc_embed_signup_scroll.center
+              h2 Learn more: Sign up for Pop Up Archive's weekly newsletter!
+              h3.center Industry news for archivists, producers, and lovers of archival sound
+              .mc-field-group
+                label for="mce-EMAIL"
+                  p.highlight email:
+                  input#mce-EMAIL.required.email name="EMAIL" type="email" value="" /
+                input#mc-embedded-subscribe.button.validate action="//popuparchive.us5.list-manage.com/subscribe/post?u=832c18aae4790d85320ab01da&amp;id=39650ec21b" method="post" name="mc-embedded-subscribe-form" novalidate="" target="_blank" type="submit" value="Subscribe" / 
+              p
+                a.news href="http://us5.campaign-archive2.com/home/?u=832c18aae4790d85320ab01da&id=39650ec21b" View Letter Archive
+              #mce-responses.clear
+                #mce-error-response.response style="display:none" 
+                #mce-success-response.response style="display:none" 
+              /! real people should not fill this in and expect good things - do not remove this or risk form bot signups
+              div style=("position: absolute; left: -5000px;") 
+                input name="b_832c18aae4790d85320ab01da_39650ec21b" tabindex="-1" type="text" value="" /
+            /! End MailChimp Signup Form
+      .col-md-12
+        #logos
+          img src="#{asset_path('home/logos-white.jpg')}"
     .row
       .col-md-12
         h2#user_stories_section User Stories
