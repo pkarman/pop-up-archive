@@ -153,7 +153,7 @@ class AudioFile < ActiveRecord::Base
 
   def is_mp3?
     return true if self.format == "audio/mpeg"
-    return true if self.filename_extension == "mp3"
+    return true if self.filename_extension.downcase == "mp3"
     return false
   end
   
