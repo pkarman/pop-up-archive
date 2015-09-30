@@ -1,10 +1,9 @@
-.row#about
-  .marge  
-    #exp2  
-      | Searching speech should be as easy as searching text. 
-    #exp1
+#about.row
+  .col-xs-12
+    h1 Searching speech should be as easy as searching text.
+    p
       | To a search engine, untranscribed audio is invisible audio. With text, every keyword is a breadcrumb, leading new audiences to discover that material online. Yet with audio, these same keywords are hidden, making recorded voices inaccessible to the audiences they deserve. We're here to make your audio visible to the web.
-    #exp3
+    p
       | Here's how it works: 
       span.highlight Upload a spoken-word audio file
       | . Our software 
@@ -14,22 +13,23 @@
       |  to perfection with our in-site tools, or simply sit back and let the 
       span.highlight  search engines 
       |  do their thing with the keywords we picked out.
-    h3 API and projects
-    span 
-      | Integrate Pop Up Archive data with workflows that make sense for your organization. Check out the 
-    a href="https://developer.popuparchive.com/"  
-      | Pop Up Archive API
-    span  
-      | , and our project 
-    a href="https://www.audiosear.ch/" 
-      | Audiosear.ch
-    span
-      |: a full text search and recommendation API for podcasts and radio.
+    .heading API and projects
+    p
+      span 
+        | Integrate Pop Up Archive data with workflows that make sense for your organization. Check out the 
+      a href="https://developer.popuparchive.com/"  
+        | Pop Up Archive API
+      span  
+        | , and our project 
+      a href="https://www.audiosear.ch/" 
+        | Audiosear.ch
+      span
+        |: a full text search and recommendation API for podcasts and radio.
 
     #aboutvid
       <iframe src="//player.vimeo.com/video/74795063?title=0&amp;byline=0&amp;portrait=0" width="930" height="523" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
     
-    #transcript-process.info-box
+    .info-box
       h3 
         | We create timestamped
         span.highlight  machine transcripts and tags
@@ -38,7 +38,7 @@
         |.
       img.img-rounded src="#{asset_path('about/stella-processing-dwnld.png')}" /
 
-    #edit-file.info-box
+    .info-box
       h3 
         | Edit your transcripts using
         span.highlight  key commands to pause and rewind
@@ -46,7 +46,7 @@
 
       img.img-rounded src="#{asset_path('about/edit.png')}" /
 
-    #edit-tags.info-box  
+    .info-box  
       h3 
         | And accept or reject tags from a list of 
         span.highlight  machine-generated keywords
@@ -54,7 +54,7 @@
 
       img.img-rounded src="#{asset_path('about/toe-tags.png')}" /
         
-    #searchfile.info-box
+    .info-box
       h3 
         | Enter a search term to look within your audio
         span.highlight  to the second
@@ -69,10 +69,8 @@
           |.
         img.img-thumbnail src="#{asset_path('about/colsearch.png')}" /
 
-    #aboutcta  
+    #aboutcta
       img.img-rounded src="#{asset_path('about/seo-illust.jpg')}" /
-
-    #aboutctatext
       h3.highlight It's time to open up audio to digital discovery.
 
       a.btn.btn-info href="http://popuparchive.com/pricing" Join us to search your sound
