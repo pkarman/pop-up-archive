@@ -59,9 +59,6 @@ angular.module('Directory.items.controllers', ['Directory.loader', 'Directory.us
     );
   };
 
-
-  $scope.defaultShareImage = $window.location.protocol + "//" + $window.location.host + '<%= asset_path("pua-fb-1200x630.png") %>';
-
   $scope.updateImage = function(format) {
     if (!format) format = 'thumb';
     if ($scope.item && $scope.item.imageFiles.length) {
