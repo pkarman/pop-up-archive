@@ -588,6 +588,9 @@ Law, Silicon Valley, public media organizations, archives, standards-making bodi
       return ( size / Math.pow(1024, i) ).toFixed(1) * 1 + ' ' + ['B', 'KB', 'MB', 'GB', 'TB'][i];
     };
 
+    // For OG tags
+    $scope.defaultShareImage = window.location.protocol+"//"+window.location.host+'<%= asset_path("pua-fb-1200x630.png") %>';
+    $scope.mainUrl = window.location.protocol+"//"+window.location.host;
   }]);
   // Directive for showing the loading mask on all except static pages
   window.directory.directive('loadingMask', ['$location', function($location) {
