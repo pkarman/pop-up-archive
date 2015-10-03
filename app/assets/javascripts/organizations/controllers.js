@@ -32,15 +32,15 @@ angular.module('Directory.organizations.controllers', ['Directory.loader', 'Dire
       data: { email: email_addr },
       url: '/api/organizations/'+org.id+'/member',
       method: 'POST'
-    }).then(function(data, textStatus, jqHXR) {
+    }).then(function(response) {
       $scope.addMessage({
         'type': 'success',
         'title': 'Invitation sent',
         'content': 'A invitation email has been sent to ' + email_addr
       });
       $route.reload();
-    }, function(jqXHR, textStatus, error) {
-      //console.log(jqXHR);
+    }, function(response) {
+      // console.log(response);
       //var err = jQuery.parseJSON(jqXHR.responseText);
       //console.log(err);
       $scope.setMemberError('Something went wrong. Emails must correspond to users with existing Pop Up accounts.');
@@ -55,6 +55,27 @@ angular.module('Directory.organizations.controllers', ['Directory.loader', 'Dire
       'title': 'Error',
       'content': msg
     });
+  };
+
+  $scope.deleteMember = function(user) {
+    if (window.confirm("Are you sure you want to delete "+user.name+" from this organization?")) {
+      var org = $scope.organization;
+      $http({
+        data: { user_id: user.id },
+        url: '/api/organizations/'+org.id+'/member',
+        method: 'PUT'
+      }).then(function(data) {
+        $scope.addMessage({
+          'type': 'success',
+          'title': 'User removed',
+          'content': 'Successfully removed ' + user.name
+        });
+        $route.reload();
+      }, function(response) {
+        // console.log(response);
+        $scope.setMemberError('Something went wrong. Please reload this page and try again.');
+      });
+    }
   };
 
 }]);
