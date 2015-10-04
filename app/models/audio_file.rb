@@ -476,35 +476,37 @@ class AudioFile < ActiveRecord::Base
       logger.debug "detect_derivatives audio_file #{self.id} not yet saved to archive.org"
       return
     end
+    versions=["mp3", "ogg"]
+    versions.each do |version|
+      # does a task already exist?
+      if task = (tasks.copy_to_s3.valid.where(identifier: "copy_#{version}_to_s3").last || tasks.select { |t| t.identifier == "copy_#{version}_to_s3" && t.cancelled? }.pop)
+        logger.warn "copy_#{version}_to_s3 task #{task.id} already exists for audio_file #{self.id}"
+        next
+      end
 
-    # does a task already exist?
-    if task = (tasks.copy_to_s3.valid.where(identifier: 'copy_to_s3').last || tasks.select { |t| t.type == "Tasks:CopyToS3Task" && t.cancelled? }.pop)
-      logger.warn "copy_to_s3 task #{task.id} already exists for audio_file #{self.id}"
-      return
+      s3_storage = StorageConfiguration.popup_storage
+      # must save so task points to actual db record
+      s3_storage.save!
+
+      orig = self.process_file_url(version)
+      dest = self.destination({ storage: s3_storage, version: version })
+
+      # protocol-free links are valid for browsers but not for us
+      if orig.match('^//')
+        orig = 'http:' + orig
+      end 
+
+      task = Tasks::CopyToS3Task.new(
+        identifier: "copy_#{version}_to_s3",
+        storage_id: s3_storage.id,
+        extras: {
+          'user_id'     => self.user_id,
+          'original'    => orig,
+          'destination' => dest
+        }   
+      )   
+      self.tasks << task
     end
-
-    s3_storage = StorageConfiguration.popup_storage
-    # must save so task points to actual db record
-    s3_storage.save!
-
-    orig = self.process_file_url # should be .mp3 file
-    dest = self.destination({ storage: s3_storage, version: 'mp3' })
-
-    # protocol-free links are valid for browsers but not for us
-    if orig.match('^//')
-      orig = 'http:' + orig
-    end 
-
-    task = Tasks::CopyToS3Task.new(
-      identifier: 'copy_to_s3',
-      storage_id: s3_storage.id,
-      extras: {
-        'user_id'     => self.user_id,
-        'original'    => orig,
-        'destination' => dest
-      }   
-    )   
-    self.tasks << task
   end
 
   def detect_urls

@@ -133,12 +133,12 @@ module FileStorage
     !copy_media? || !has_file?
   end
 
-  def process_file_url
+  def process_file_url(version='mp3')
     #account for the fact that the IA is case sensitive when matching file extension
-    if storage.provider == "InternetArchive" and /\.MP3/.match(file.path)
-      return "https://archive.org/download/#{file.model.destination_directory}/#{file.path}"
-    end
-    return file.url('mp3')   if storage.is_public? && file.url('mp3')
+    # if storage.provider == "InternetArchive" and /\.MP3/.match(file.path)
+    #   return "https://archive.org/download/#{file.model.destination_directory}/#{file.path}"
+    # end
+    return file.url(version)   if storage.is_public? && file.url(version)
     return original_file_url if use_original_file_url? && original_file_url
     destination
   end

@@ -375,5 +375,19 @@ namespace :fixer do
     end
   end
 
+  desc "Copy all IA ogg files to S3"
+  task ia_ogg_copy: [:environment] do
+    Task.where(type: "Tasks::CopyToS3Task").each do |t|
+      t.identifier = "copy_mp3_to_s3"
+      t.save
+    end
+    AudioFile.find_in_batches do |afs|
+      afs.each do |af|
+        next unless af.storage && af.storage.automatic_transcode?
+        af.start_copy_to_s3_job
+      end
+    end
+  end
+
 end
 
