@@ -23,11 +23,12 @@ class MonthlyUsage < ActiveRecord::Base
     transcriber_id = Transcriber.ids_for_type(usage_type)
     ymd = DateTime.parse(self.yearmonth + '-01')
     if entity_type == 'User' && use.match(/usage only/)
-      sql = entity.sql_for_transcripts_usage_for_month_of(ymd, transcriber_id)
+      transcripts = entity.find_transcripts_usage_for_month_of(ymd, transcriber_id)
     else
       sql = entity.sql_for_billable_transcripts_for_month_of(ymd, transcriber_id)
+      transcripts = Transcript.find_by_sql(sql)
     end
-    Transcript.find_by_sql(sql)
+    transcripts
   end
 
   def value_as_hms

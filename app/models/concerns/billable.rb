@@ -111,7 +111,7 @@ module Billable
   end
 
   # this references self.id so currently only applicable/accurate for User objects.
-  def sql_for_transcripts_usage_for_month_of(dtim=DateTime.now, transcriber_id)
+  def find_transcripts_usage_for_month_of(dtim=DateTime.now, transcriber_id)
 
     # hand-roll sql to optimize query.
     # there might be a way to do this all with activerecord but my activerecord-fu is weak.
@@ -122,26 +122,19 @@ module Billable
     end_dtim   = month_end.strftime('%Y-%m-%d %H:%M:%S')
 
     # NOTE we use collections, not billable_collections.
-    collection_ids = collections.map { |c| c.id.to_s }
+    collection_ids = collections.map { |c| c.id }
 
     # abort early if we have no collections
-    return "select * from transcripts where id < 0" if collection_ids.size == 0
+    return nil if collection_ids.size == 0
 
-    # transcriber_id may be an array
-    tids = transcriber_id
-    if transcriber_id.is_a?(Array)
-      tids = transcriber_id.join(',')
-    end
+    # abort early if we have no collections
+    return nil if collection_ids.size == 0
 
-    items_sql = "select i.id from items as i where i.collection_id in (#{collection_ids.join(',')})"
-    audio_files_sql = "select af.id from audio_files as af "
-    audio_files_sql += "where af.duration is not null and af.user_id=#{self.id} and af.item_id in (#{items_sql})"
-    transcripts_sql = "select * from transcripts as t where t.transcriber_id in (#{tids}) and t.audio_file_id in (#{audio_files_sql})"
-    transcripts_sql += " and t.created_at between '#{start_dtim}' and '#{end_dtim}'"
-    transcripts_sql += " and t.is_billable=true"
-    transcripts_sql += " order by t.created_at asc"
-
-    return transcripts_sql
+    items=Item.where({collection_id: collection_ids}).pluck(:id)
+    audio_files=AudioFile.where({item_id: items}).where("duration > 0").pluck(:id)
+    transcripts=Transcript.where({audio_file_id: audio_files}).where("created_at >= ? AND created_at <= ?", start_dtim, end_dtim).where(transcriber_id: transcriber_id).where(is_billable: true)
+    transcripts = transcripts.order(:created_at)
+    return transcripts
   end
 
   # limit (optional) should be a DateTime object
@@ -210,12 +203,12 @@ module Billable
     total_cost = 0 
     total_retail_cost = 0 
 
-    sql = sql_for_transcripts_usage_for_month_of(dtim, transcriber_id)
+    transcripts = find_transcripts_usage_for_month_of(dtim, transcriber_id)
 
     # abort early if we have no valid SQL
-    return { :seconds => 0, :cost => 0, :retail_cost => 0 } if !sql
+    return { :seconds => 0, :cost => 0, :retail_cost => 0 } if !transcripts
 
-    Transcript.find_by_sql(sql).each do |tr|
+    transcripts.each do |tr|
       af = tr.audio_file_lazarus
       total_secs += tr.billable_seconds(af)
       total_cost += tr.cost(af)
@@ -462,9 +455,9 @@ module Billable
     monthly_usages.each do |mu|
       next unless mu.value > 0
       dtim = DateTime.parse(mu.yearmonth+'-01')
-      sql = sql_for_transcripts_usage_for_month_of(dtim, premium_ids)
-      next unless sql
-      Transcript.find_by_sql(sql).each do |tr|
+      transcripts = find_transcripts_usage_for_month_of(dtim, premium_ids)
+      next unless transcripts
+      transcripts.each do |tr|
         next unless tr.subscription_plan_id == comm_plan_id
         af = tr.audio_file_lazarus
         total_secs += tr.billable_seconds(af)
@@ -478,13 +471,13 @@ module Billable
   def premium_noncommunity_transcripts_usage(dtim=DateTime.now)
     comm_plan_id = SubscriptionPlanCached.community.as_plan.id
     premium_ids = Transcriber.ids_for_type('premium')
-    sql = sql_for_transcripts_usage_for_month_of(dtim, premium_ids)
+    transcripts = find_transcripts_usage_for_month_of(dtim, premium_ids)
 
     # abort early if we have no valid SQL
-    return 0 if !sql
+    return 0 if !transcripts
 
     total_secs = 0
-    Transcript.find_by_sql(sql).each do |tr|
+    transcripts.each do |tr|
       next if tr.subscription_plan_id == comm_plan_id
       af = tr.audio_file_lazarus
       total_secs += tr.billable_seconds(af)
