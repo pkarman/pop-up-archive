@@ -5,8 +5,8 @@ angular.module('RailsUjs', [])
 
   return function(scope, el, attrs) {
     // Add this class to forms for which we don't want Angular to create a hidden copy
-    if(attrs.class && !attrs.class.includes("no-ujs")) {
-
+    if((attrs.class && !attrs.class.includes("no-ujs")) || !attrs.class) {
+      console.log(attrs);
       scope.formInfo = attrs;
       var form;
 
