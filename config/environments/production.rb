@@ -93,7 +93,7 @@ PopUpArchive::Application.configure do
   end
   
   #Prerender.io
-  config.middleware.use Rack::Prerender, prerender_token: ENV['PRERENDER_TOKEN']
+  # config.middleware.use Rack::Prerender, prerender_token: ENV['PRERENDER_TOKEN']
 
   #Obscenity- for filtering terms
   Obscenity.configure do |config|
