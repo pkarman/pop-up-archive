@@ -401,6 +401,20 @@ describe User do
       user.plan.should eq paid_plan
     end
 
+    it 'it trials upgrading users until the end of the month' do
+      user.subscribe!(plan)
+      cus = user.customer.stripe_customer
+      
+      subscr = user.customer.stripe_subscription(cus)
+      subscr.metadata[:start] = 1438990962
+      subscr.save
+
+      user.update_card!(card_token)
+      user.subscribe!(paid_plan)
+      
+      user.customer.is_interim_trial?.should eq true
+    end
+
     it 'has a number of pop up hours determined by the subscription' do
       user.subscribe!(plan)
 

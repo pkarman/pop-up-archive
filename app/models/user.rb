@@ -209,7 +209,7 @@ class User < ActiveRecord::Base
           trial_end = customer.class.end_of_this_month
         end
         # if moving from community to non-community, treat like trial
-        if (orig_plan.id == :premium_community || orig_plan.name == "Premium Community") && !plan.is_community?
+        if (orig_plan.id == "premium_community" || orig_plan.name == "1 Hour Demo") && !plan.is_community?
           trial_end = customer.class.end_of_this_month
         end
       end 
@@ -252,11 +252,11 @@ class User < ActiveRecord::Base
 
   def plan
     if organization && (organization.owner_id != id)
-      return organization.plan || SubscriptionPlanCached.community
+      return organization.plan || SubscriptionPlanCached.premium_community
     elsif subscription_plan_id.present?
-      return subscription_plan.as_cached || SubscriptionPlanCached.community
+      return subscription_plan.as_cached || SubscriptionPlanCached.premium_community
     else
-      return customer.plan || SubscriptionPlanCached.community
+      return customer.plan || SubscriptionPlanCached.premium_community
     end
   end
 
