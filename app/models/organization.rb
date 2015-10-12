@@ -42,6 +42,15 @@ class Organization < ActiveRecord::Base
     user
   end
 
+  def delete_user(user)
+    if user.organization
+      user.organization_id = nil
+    elsif user.invited_by_id
+      user.invited_by_id = nil
+    end
+    user.save!
+  end
+
   # entity method makes an Org act like a User for billable concern
   def entity
     self
