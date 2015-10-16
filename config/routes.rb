@@ -147,6 +147,7 @@ PopUpArchive::Application.routes.draw do
 
       resources :organizations
       post '/organizations/:id/member' => 'organizations#member'
+      put '/organizations/:id/member' => 'organizations#delete_member'
 
       resources :plans
 

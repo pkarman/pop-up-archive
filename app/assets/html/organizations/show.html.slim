@@ -10,6 +10,8 @@ ul
   li ng-repeat="user in organization.invitedUsers" class="organization-member organization-member-invite"
     span class='name' ng-bind="user.name"
     span class='role' Invited
+    button.btn.btn-default class='delete-member' title="Delete member" ng-click="deleteMember(user)" ng-if="user.role !== 'admin' && currentUser.isAdmin()" x
   li ng-repeat="user in organization.users" class="organization-member"
     span class='name' ng-bind="user.name"
     span class='role' ng-bind="user.role"
+    button.btn.btn-default class='delete-member' title="Delete member" ng-click="deleteMember(user)" ng-if="user.role !== 'admin' && currentUser.isAdmin()" x

@@ -1,3 +1,9 @@
+meta view-head="view-head" property="og:title" content="Pop Up Archive"
+meta view-head="view-head" property="og:image" content="{{defaultShareImage}}"
+meta view-head="view-head" property="og:description" content="{{metaDescription()}}"
+meta view-head="view-head" property="og:url" content="{{mainUrl}}"
+meta view-head="view-head" property="og:type" content="website"
+
 #home
   #feature-image
     h2 Search your sound.
@@ -44,11 +50,27 @@
             td
               h4 Your sound, in one place, searchable to the second.
 
+
   #home-feature          
     .row
-    .col-md-12
-      #logos
-        img src="#{asset_path('home/logos-white.jpg')}"
+      hr
+      #newsletter.center
+        h2 Learn more: Sign up for Pop Up Archive's weekly newsletter!
+        h3 Industry news for archivists, producers, and lovers of archival sound
+        /! Begin MailChimp Signup Form
+        form.form-inline.validate.no-ujs action="//popuparchive.us5.list-manage.com/subscribe/post?u=832c18aae4790d85320ab01da&amp;id=39650ec21b" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" target="_blank" novalidate=""
+          .form-group
+            input.email.form-control type="email" name="EMAIL" id="mce-EMAIL" placeholder="email address" required=""
+            div style=("position: absolute; left: -5000px;") 
+              input name="b_832c18aae4790d85320ab01da_39650ec21b" tabindex="-1" type="text" value=""
+          .form-group    
+            input.button.btn.btn-default type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe"
+        a.news href="http://us5.campaign-archive2.com/home/?u=832c18aae4790d85320ab01da&id=39650ec21b" View Letter Archive
+        /! End MailChimp Signup Form
+      hr
+      .col-md-12
+        #logos
+          img src="#{asset_path('home/logos-white.jpg')}"
     .row
       .col-md-12
         h2#user_stories_section User Stories
