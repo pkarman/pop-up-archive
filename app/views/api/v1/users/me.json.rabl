@@ -34,7 +34,9 @@ if current_user
   node(:total_metered_storage) { current_user.pop_up_hours * 3600 }
   node(:usage) { { summary: current_user.usage_summary, transcripts: [] } }
   node(:over_monthly_limit) { current_user.is_over_monthly_limit? }
-  node(:community_plan_used) { current_user.premium_community_transcripts_usage }
+  if !current_user.organization_id
+    node(:community_plan_used) { current_user.premium_community_transcripts_usage } 
+  end
   node(:offer_ended) { current_user.is_offer_ended? }
   node(:plan) { current_user.plan_json }
   node(:credit_card) { current_user.active_credit_card_json } if current_user.active_credit_card.present?

@@ -112,9 +112,9 @@ module Billable
 
   # this references self.id so currently only applicable/accurate for User objects.
   def find_transcripts_usage_for_month_of(dtim=DateTime.now, transcriber_id)
-
-    # hand-roll sql to optimize query.
-    # there might be a way to do this all with activerecord but my activerecord-fu is weak.
+    Rails.logger.debug "********************************************************"
+    Rails.logger.debug self
+    return if self.is_a?(Organization)
 
     month_start = dtim.utc.beginning_of_month
     month_end = dtim.utc.end_of_month
@@ -123,9 +123,6 @@ module Billable
 
     # NOTE we use collections, not billable_collections.
     collection_ids = collections.map { |c| c.id }
-
-    # abort early if we have no collections
-    return nil if collection_ids.size == 0
 
     # abort early if we have no collections
     return nil if collection_ids.size == 0
@@ -202,6 +199,9 @@ module Billable
     total_secs = 0 
     total_cost = 0 
     total_retail_cost = 0 
+
+    Rails.logger.debug "transcripts_usage_for_month_of"
+    Rails.logger.debug dtim, transcriber_id
 
     transcripts = find_transcripts_usage_for_month_of(dtim, transcriber_id)
 
@@ -455,6 +455,8 @@ module Billable
     monthly_usages.each do |mu|
       next unless mu.value > 0
       dtim = DateTime.parse(mu.yearmonth+'-01')
+
+      Rails.logger.debug "premium_community_transcripts_usage"
       transcripts = find_transcripts_usage_for_month_of(dtim, premium_ids)
       next unless transcripts
       transcripts.each do |tr|
@@ -471,6 +473,7 @@ module Billable
   def premium_noncommunity_transcripts_usage(dtim=DateTime.now)
     comm_plan_id = SubscriptionPlanCached.community.as_plan.id
     premium_ids = Transcriber.ids_for_type('premium')
+    Rails.logger.debug "premium_noncommunity_transcripts_usage"
     transcripts = find_transcripts_usage_for_month_of(dtim, premium_ids)
 
     # abort early if we have no valid SQL
