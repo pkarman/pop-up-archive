@@ -201,7 +201,6 @@ module Billable
     total_retail_cost = 0 
 
     Rails.logger.debug "transcripts_usage_for_month_of"
-    Rails.logger.debug dtim, transcriber_id
 
     transcripts = find_transcripts_usage_for_month_of(dtim, transcriber_id)
 
