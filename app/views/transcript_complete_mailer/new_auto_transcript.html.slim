@@ -1,3 +1,5 @@
+- title = @item.title || @audio_file.filename
+
 .email-header
   | Hello 
   = @user.name
@@ -6,7 +8,7 @@
 .email-body
   p
     | The automated speech-to-text transcript has completed for item: '
-    = link_to @item.title + ' (file: ' + @audio_file.filename + ')', @item.url
+    = link_to title + ' (file: ' + @audio_file.filename + ')', @item.url
     |'.
   p
     | Check it out! Read our 
