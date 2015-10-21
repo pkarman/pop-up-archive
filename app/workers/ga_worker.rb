@@ -4,7 +4,7 @@ require 'staccato'
 class GAWorker
   include Sidekiq::Worker
 
-  sidekiq_options retry: 10, backtrace: true
+  sidekiq_options queue: 'google_analytics', retry: 10, backtrace: true
 
   def perform(meth, args)
     begin
