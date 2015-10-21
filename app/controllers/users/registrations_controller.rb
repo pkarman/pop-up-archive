@@ -75,7 +75,6 @@ class Users::RegistrationsController < Devise::RegistrationsController
   end
 
   def plan_id
-    # session[:plan_id] = "premium_community" if params[:plan_id] == "community" || session[:plan_id] == "community"
     session[:plan_id] = (params[:plan_id] || session[:plan_id])
   end
 
