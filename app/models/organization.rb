@@ -56,10 +56,6 @@ class Organization < ActiveRecord::Base
     self
   end
 
-  def owns_collection?(coll)
-    has_role?(:owner, coll)
-  end
-
   def has_grant_for?(coll)
     collection_grants.each do |cg|
       if cg.collection_id == coll.id

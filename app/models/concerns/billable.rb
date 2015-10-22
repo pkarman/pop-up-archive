@@ -218,18 +218,7 @@ module Billable
     # cost_per_min is in 1000ths of a dollar, not 100ths (cents)
     # but we round to the nearest penny when we cache it in aggregate.
     return { :seconds => total_secs, :cost => total_cost.fdiv(1000), :retail_cost => total_retail_cost.fdiv(1000) }
-  end 
-
-  def my_audio_file_storage(metered=true)
-    total_secs = 0
-    my_audio_files.each do |af|
-      next unless af.duration
-      if af.metered == metered
-        total_secs += af.duration
-      end
-    end
-    return total_secs
-  end 
+  end  
 
   def usage_for(use, now=DateTime.now)
     monthly_usages.where(use: use, year: now.utc.year, month: now.utc.month).sum(:value)
@@ -281,26 +270,6 @@ module Billable
 
   def used_premium_transcripts
     @_used_premium_transcripts ||= total_transcripts_report(:premium)
-  end
-
-  def get_total_seconds(ttype)
-    ttype_s = ttype.to_s
-    methname = 'used_' + ttype_s + '_transcripts'
-    if transcript_usage_cache.has_key?(ttype_s+'_seconds')
-      return transcript_usage_cache[ttype_s+'_seconds'].to_i
-    else
-      return send(methname)[:seconds].to_i
-    end
-  end
-
-  def get_total_cost(ttype)
-    ttype_s = ttype.to_s
-    methname = 'used_' + ttype_s + '_transcripts'
-    if transcript_usage_cache.has_key?(ttype_s+'_cost')
-      return transcript_usage_cache[ttype_s+'_cost'].to_f
-    else
-      return send(methname)[:cost].to_f
-    end
   end
 
   # Returns JSON-ready hash of monthly usage, including on-demand charges.
@@ -397,25 +366,6 @@ module Billable
     self.entity.hours_remaining <= 0.0
   end
 
-  def is_within_sight_of_monthly_limit?
-    summ      = self.entity.usage_summary
-    threshold = (plan.hours * 0.85).to_f
-    if summ[:this_month][:hours] > threshold
-      return true
-    else
-      return false
-    end
-  end
-
-  def send_usage_alert
-    subject = 'ALERT: Your Pop Up Archive usage is nearing its limit'
-    summ = self.entity.usage_summary
-    plan_hours = plan.hours
-    body    = sprintf("You have used %d (%d%%) of your monthly limit of %d hours.", \
-                summ[:this_month][:hours], ((summ[:this_month][:hours] / plan_hours) * 100), plan_hours)
-    MyMailer.usage_alert(subject, body, self.entity.owner.email).deliver
-  end
-
   def prorated_charge_for_month(dtim)
     # get number of days active in the month
     days_in_month = dtim.end_of_month.strftime('%d').to_i
@@ -485,13 +435,63 @@ module Billable
     total_secs
   end
 
-  def hours_used_in_month(dtim=DateTime.now)
-    secs = 0 
-    this_month = dtim.strftime('%Y-%m')
-    monthly_usages.where(yearmonth: this_month).each do |mu|
-      secs += mu.value
-    end 
-    secs.fdiv(3600)
-  end
+  # def my_audio_file_storage(metered=true)
+  #   total_secs = 0
+  #   my_audio_files.each do |af|
+  #     next unless af.duration
+  #     if af.metered == metered
+  #       total_secs += af.duration
+  #     end
+  #   end
+  #   return total_secs
+  # end
+
+  # def get_total_seconds(ttype)
+  #   ttype_s = ttype.to_s
+  #   methname = 'used_' + ttype_s + '_transcripts'
+  #   if transcript_usage_cache.has_key?(ttype_s+'_seconds')
+  #     return transcript_usage_cache[ttype_s+'_seconds'].to_i
+  #   else
+  #     return send(methname)[:seconds].to_i
+  #   end
+  # end
+
+  # def get_total_cost(ttype)
+  #   ttype_s = ttype.to_s
+  #   methname = 'used_' + ttype_s + '_transcripts'
+  #   if transcript_usage_cache.has_key?(ttype_s+'_cost')
+  #     return transcript_usage_cache[ttype_s+'_cost'].to_f
+  #   else
+  #     return send(methname)[:cost].to_f
+  #   end
+  # end
+
+  # def is_within_sight_of_monthly_limit?
+  #   summ      = self.entity.usage_summary
+  #   threshold = (plan.hours * 0.85).to_f
+  #   if summ[:this_month][:hours] > threshold
+  #     return true
+  #   else
+  #     return false
+  #   end
+  # end
+
+  # def send_usage_alert
+  #   subject = 'ALERT: Your Pop Up Archive usage is nearing its limit'
+  #   summ = self.entity.usage_summary
+  #   plan_hours = plan.hours
+  #   body    = sprintf("You have used %d (%d%%) of your monthly limit of %d hours.", \
+  #               summ[:this_month][:hours], ((summ[:this_month][:hours] / plan_hours) * 100), plan_hours)
+  #   MyMailer.usage_alert(subject, body, self.entity.owner.email).deliver
+  # end
+
+  # def hours_used_in_month(dtim=DateTime.now)
+  #   secs = 0 
+  #   this_month = dtim.strftime('%Y-%m')
+  #   monthly_usages.where(yearmonth: this_month).each do |mu|
+  #     secs += mu.value
+  #   end 
+  #   secs.fdiv(3600)
+  # end
 
 end
