@@ -17,7 +17,53 @@ angular.module('Directory.items.controllers', ['Directory.loader', 'Directory.us
 
 }])
 .controller('ItemCtrl', ['$scope', '$timeout', '$q', '$modal', '$http', '$route', 'Item', 'Loader', 'Me', '$routeParams', 'Collection', 'Entity', '$location', 'SearchResults', 'Storage', '$window', 'Speaker', function ItemCtrl($scope, $timeout, $q, $modal, $http, $route, Item, Loader, Me, $routeParams, Collection, Entity, $location, SearchResults, Storage, $window, Speaker) {
+  $scope.adobe = $window.adobe;
+  $scope.xmpDump = function() {
+    var timedTexts = $scope.item.audioFiles[0].transcript.parts;
+    var generateMarkerString = function() {
+      var markerString = "";
+      for (var i=0;i<timedTexts.length;i++) {
+        var startTime = parseInt(timedTexts[i].startTime)*1000;
+        var duration = parseInt(timedTexts[i].endTime)*1000 - startTime;
+        var thisMarker = "xmp.appendArrayItem(XMPConst.NS_DM, trackIndexPath+'xmpDM:markers', null, XMPConst.PROP_IS_STRUCT);"+
+          "var markerIndexPath = XMPUtils.composeArrayItemPath(XMPConst.NS_DM, trackIndexPath+'xmpDM:markers', XMPConst.ARRAY_LAST_ITEM);"+
+          "xmp.setStructField(XMPConst.NS_DM, markerIndexPath, XMPConst.NS_DM, 'name', '"+timedTexts[i].text.replace(/'/g, "\\'")+"');"+
+          "xmp.setStructField(XMPConst.NS_DM, markerIndexPath, XMPConst.NS_DM, 'startTime', "+startTime+");"+
+          "xmp.setStructField(XMPConst.NS_DM, markerIndexPath, XMPConst.NS_DM, 'duration', "+duration+");";
+        markerString += thisMarker;
+      };
+      return markerString;
+    };
+    var generateEvalString = function() {
+      var markerString = generateMarkerString();
+      var evalString = "var projectItem = app.project.rootItem.children[0];"+
+      "if (projectItem != null) {"+
+        "if (ExternalObject.AdobeXMPScript == undefined) {"+
+          "ExternalObject.AdobeXMPScript = new ExternalObject('lib:AdobeXMPScript');"+
+        "}"+
+        "if (ExternalObject.AdobeXMPScript != undefined) {"+
+          "var xmp_blob = projectItem.getXMPMetadata();"+
+          "var xmp = new XMPMeta(xmp_blob);"+
+          "var hasXmpDMTracks = xmp.doesPropertyExist(XMPConst.NS_DM, 'Tracks');"+
+          "if (!hasXmpDMTracks) {"+
+            "xmp.setProperty(XMPConst.NS_DM, 'Tracks', null, XMPConst.PROP_IS_ARRAY);"+
+          "}"+
+          "xmp.appendArrayItem(XMPConst.NS_DM, 'Tracks', null, XMPConst.PROP_IS_STRUCT);"+
+          "var trackIndexPath = XMPUtils.composeArrayItemPath(XMPConst.NS_DM, 'Tracks', XMPConst.ARRAY_LAST_ITEM);"+
+          "xmp.setStructField(XMPConst.NS_DM, trackIndexPath, XMPConst.NS_DM, 'trackType', 'Speech');"+
+          "xmp.setStructField(XMPConst.NS_DM, trackIndexPath, XMPConst.NS_DM, 'trackName', 'text transcription');"+
+          "xmp.setStructField(XMPConst.NS_DM, trackIndexPath, XMPConst.NS_DM, 'frameRate', 'f1000');"+
+          "xmp.setProperty(XMPConst.NS_DM, trackIndexPath+'xmpDM:markers', null, XMPConst.ARRAY_IS_ORDERED);"+
+          markerString +
+          "var xmpData = xmp.serialize();"+
+          "projectItem.setXMPMetadata(xmpData);"+
+        "}"+
+      "}";
+      return evalString;
+    };
 
+    cs.evalScript(generateEvalString());
+  };
   $scope.Storage = Storage;
 
   $scope.storageModal = $modal({template: '/assets/items/storage.html', persist: false, show: false, backdrop: 'static', scope: $scope});
