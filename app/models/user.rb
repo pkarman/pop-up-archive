@@ -252,11 +252,11 @@ class User < ActiveRecord::Base
 
   def plan
     if organization && (organization.owner_id != id)
-      return organization.plan || SubscriptionPlanCached.premium_community
+      return organization.plan || SubscriptionPlanCached.community
     elsif subscription_plan_id.present?
-      return subscription_plan.as_cached || SubscriptionPlanCached.premium_community
+      return subscription_plan.as_cached || SubscriptionPlanCached.community
     else
-      return customer.plan || SubscriptionPlanCached.premium_community
+      return customer.plan || SubscriptionPlanCached.community
     end
   end
 
