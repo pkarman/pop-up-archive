@@ -282,7 +282,7 @@ module Billable
     month = now.utc.month
     thismonth = sprintf("%d-%02d", year, month)
     summary[:this_month][:period] = thismonth
-    monthly_usages.order('"yearmonth" desc, "use" asc').slice(0,24).each do |mu|
+    monthly_usages.order('"yearmonth" desc, "use" asc').slice(0,48).each do |mu|
       msum = { 
         period: mu.yearmonth,
         type:   mu.use,
