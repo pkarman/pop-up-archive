@@ -94,18 +94,6 @@ namespace :monitor do
     end
     combo = with_owner + upload_not_complete_files
     uniques = combo.inject([]) { |result,h| result << h unless result.include?(h); result } 
-
-    file = "../Desktop/output_files_users.csv"
-
-    #this outputs list of audiofiles to be deleted with user emails 
-    CSV.open(file, 'w') do |writer|
-      uniques.each do |i|
-        i.each do |key, value|
-          writer << [value["audio_id"], value["name"], value["date_created"], ] 
-        end
-      end
-    end
-
     uniques.each do |key,value|
       key.each do |k,v|
         if AudioFile.exists?(v["audio_id"]) 
@@ -113,9 +101,20 @@ namespace :monitor do
           #change time in new Time object to delete newer files
           if f.created_at < Time.new(2013, 11, 15)
             #uncomment next line to delete failed Uploads
-            # f.destroy 
+            # AudioFile.destroy(f)
             puts f
           end
+        end
+      end
+    end
+    file = "../Desktop/output_files_users_empty.csv"
+    p uniques.count
+    #This outputs list of audiofiles with failed upload tasks or with "G" status, with user emails. 
+    #Set specific time constraints for deletion on line 115.
+    CSV.open(file, 'w') do |writer|
+      uniques.each do |i|
+        i.each do |key, value|
+          writer << [value["audio_id"], value["name"], value["date_created"], "www.popuparchive.com/collections/#{value['collection_id']}/items/#{value['item_id']}"] 
         end
       end
     end
