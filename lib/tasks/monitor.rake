@@ -3,13 +3,21 @@ require 'csv'
 namespace :monitor do
   desc "updating feeds"
   task :feed, [:url, :collection_id] => [:environment] do |t, args|
-    puts "Scheduling new feed check: "+args.url
-    if ENV['NOW']
-      FeedPopUp.update_from_feed(args.url, args.collection_id, ENV['DRY_RUN'], ENV['OLDEST_ENTRY'])
+    puts "Scheduling new feed check: #{args.url}"
+    process_feed = true
+    account_holder = Collection.find(args.collection_id).creator.entity.id
+    process_feed = false if User.over_limits.exists?(account_holder)
+        
+    if process_feed == true
+      if ENV['NOW']
+        FeedPopUp.update_from_feed(args.url, args.collection_id, ENV['DRY_RUN'], ENV['OLDEST_ENTRY'])
+      else
+        FeedUpdateWorker.perform_async(args.url, args.collection_id, ENV['OLDEST_ENTRY'])
+      end
+      puts "done."
     else
-      FeedUpdateWorker.perform_async(args.url, args.collection_id, ENV['OLDEST_ENTRY'])
+      puts "Cannot complete for #{args}. Over usage limit warning!"
     end
-    puts "done."
   end
 
   desc "check transcripts for gaps"
