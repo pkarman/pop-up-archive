@@ -22,7 +22,7 @@ class MonthlyUsage < ActiveRecord::Base
     usage_type = use.match(/^(\w+)/)[0]
     transcriber_id = Transcriber.ids_for_type(usage_type)
     ymd = DateTime.parse(self.yearmonth + '-01')
-    sql = find_transcripts_usage_for_month_of(ymd, transcriber_id)
+    sql = entity.find_transcripts_usage_for_month_of(ymd, transcriber_id)
     Transcript.find_by_sql(sql)
   end
 
