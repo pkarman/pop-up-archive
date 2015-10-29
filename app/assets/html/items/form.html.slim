@@ -13,10 +13,10 @@ section.modal ng-controller="ItemFormCtrl"
           | Your free trial has ended.
           a href="/account/plan"  Upgrade now!
         h3 ng-show="currentUser.overMonthlyLimit && !currentUser.isOrgMember()"
-         | You are over your monthly limit.
-         a href="/account/plan"  Upgrade now!
+          | You are over your monthly limit.
+          a href="/account/plan"  Upgrade now!
         h3 ng-show="currentUser.overMonthlyLimit && currentUser.isOrgMember()"
-         | You are over your organization's monthly limit.
+          | You are over your organization's monthly limit.
         
         form.item-form.form-horizontal name='newItemForm' 
           div ng-show="showForm() && !currentuser.overMonthlyLimit"
