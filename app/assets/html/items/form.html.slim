@@ -309,4 +309,4 @@ section.modal ng-controller="ItemFormCtrl"
     
       .modal-footer
         button.btn.btn-default type="button" ng-click="$hide()" Close
-        button.btn.btn-success ng-show='((item.id > 0) || (item.files.length > 0) || (remoteFileUrls)) && showForm()' ng-disabled='!item.id && !remoteFileUrls && (!item.collectionId || item.files.length <= 0) || newItemForm.$invalid' ng-click='submit(); $hide()' Save
+        button.btn.btn-success ng-disabled='!item.id && !remoteFileUrls && (!item.collectionId || item.files.length <= 0) || newItemForm.$invalid' ng-click='submit(); $hide()' Save
