@@ -103,10 +103,11 @@ meta view-head="view-head" property="og:type" content="article"
 
           i.fa.fa-question-circle ng-show="audioFile.transcriptType == 'Basic'" style="margin-left:2px; margin-bottom:2px; margin-right:8px;" bs-popover="itemHelp['basicTranscript']" data-placement="bottom" html="true" auto-close="true"
           i.fa.fa-question-circle ng-show="audioFile.transcriptType == 'Premium'" style="margin-left:2px; margin-bottom:2px; margin-right:8px;" bs-popover="itemHelp['premiumTranscript']" data-placement="bottom" html="true" auto-close="true"
-          button.btn.btn-default ng-show="adobe && currentUser.canEdit(item)" ng-click="xmpDump()"
-            img style="width:25px; height:25px;" src="#{image_path("logos/premiere_pro_logo.png")}"
-            | &nbspImport to Premiere
-          i.fa.fa-question-circle ng-show="adobe && currentUser.canEdit(item)'" style="margin-left:2px; margin-bottom:2px; margin-right:8px;" bs-popover="itemHelp['importToPremiere']" data-placement="bottom" html="true" auto-close="true"
+          div ng-show="adobe && currentUser.canEdit(item)"
+            button.btn.btn-default ng-click="xmpDump()"
+              img style="width:25px; height:25px;" src="#{image_path("logos/premiere_pro_logo.png")}"
+              | &nbspImport to Premiere
+            i.fa.fa-question-circle style="margin-left:2px; margin-bottom:2px; margin-right:8px;" bs-popover="itemHelp['importToPremiere']" data-placement="bottom" html="true" auto-close="true"
 
         //Transcript-level buttons        
         .col-sm-7.transcript-options
