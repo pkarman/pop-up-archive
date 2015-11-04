@@ -81,7 +81,7 @@
                 |  Details
           tr.usage-month.usage-activity ng-repeat="msum in mnthGrp.rows"
             td() {{msum.type}}
-            td() {{msum.hours}} hours
+            td() {{msum.secs | timeCode: 'words'}} 
             td colspan="3"
           tr.usage-month.usage-charge.charge-pending ng-show="!mnthGrp.charges.length && $index == 0"
             td colspan="5" Charges pending
