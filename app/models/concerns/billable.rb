@@ -391,22 +391,19 @@ module Billable
     end 
   end
 
-  # return total transcript duration for all months where
+  # if user upgrades from community plan return usage for portion of month where
   # subscription plan was community
   def premium_community_transcripts_usage
     comm_plan_id = SubscriptionPlanCached.community.as_plan.id
+    return if plan.id == comm_plan_id
     premium_ids = Transcriber.ids_for_type('premium')
     total_secs = 0
-    monthly_usages.each do |mu|
-      next unless mu.value > 0
-      dtim = DateTime.parse(mu.yearmonth+'-01')
-      sql = find_transcripts_usage_for_month_of(dtim, premium_ids)
-      next unless sql
-      Transcript.find_by_sql(sql).each do |tr|
-        next unless tr.subscription_plan_id == comm_plan_id
-        af = tr.audio_file_lazarus
-        total_secs += tr.billable_seconds(af)
-      end
+    sql = find_transcripts_usage_for_month_of(DateTime.now, premium_ids)
+    return unless sql
+    Transcript.find_by_sql(sql).each do |tr|
+      next unless tr.subscription_plan_id == comm_plan_id
+      af = tr.audio_file_lazarus
+      total_secs += tr.billable_seconds(af)
     end
     total_secs
   end
