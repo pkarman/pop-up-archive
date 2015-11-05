@@ -6,7 +6,7 @@ describe Tasks::VoicebaseTranscribeTask do
   after { StripeMock.stop }
 
   let(:user) { FactoryGirl.create :user }
-  let(:audio_file) { FactoryGirl.create(:audio_file_private) }
+  let(:audio_file) { FactoryGirl.create :audio_file_private, user_id: user.id }
   let(:task) { Tasks::VoicebaseTranscribeTask.new(owner: audio_file, extras: {'user_id' => user.id}) }
 
   let(:response) {
@@ -123,7 +123,7 @@ describe Tasks::VoicebaseTranscribeTask do
 
     it 'updates paid transcript usage' do
       now = DateTime.now
-
+      user.collections << audio_file.item.collection
       # test user must own the collection, since usage is limited to billable ownership.
       audio_file.item.collection.set_owner(user)
 
