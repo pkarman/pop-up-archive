@@ -202,7 +202,7 @@ describe User do
       user.usage_summary[:this_month][:hours].should eq 1.0  # only 1 of 2 hours billable
     end
 
-    it "calculates Community plan usage regardless of month" do
+    it "calculates Community plan usage for current month" do
       audio = FactoryGirl.create(:audio_file_private)
       audio.user = audio.billable_to # override factory default
       user = audio.billable_to
@@ -230,7 +230,7 @@ describe User do
       user.plan.is_community?().should be_truthy
       user.hours_remaining.should eq 0.75  # only one transcript counted
       Timecop.travel( 90.days.from_now.to_i )
-      user.hours_remaining.should eq 0.75
+      user.hours_remaining.should eq 1.0
       Timecop.return
     end
 
