@@ -18,7 +18,7 @@ module Billable
     return [] unless billable_collection_ids.size > 0
     items_sql = "select i.id from items as i where i.collection_id in (#{billable_collection_ids.join(',')})"
     audio_files_sql = "select * from audio_files as af where af.duration is not null and af.item_id in (#{items_sql})"
-    AudioFile.find_by_sql(audio_files_sql)
+    AudioFile.with_deleted.find_by_sql(audio_files_sql)
   end
 
   # unlike normal audio_files association, which includes all records the User/Org is authorized to see,
@@ -111,24 +111,22 @@ module Billable
 
   # this returns transcript usage by user or organization for a given month based on transcriber id
   # paid transcriber ids are 2 and 3
-  def find_transcripts_usage_for_month_of(dtim=DateTime.now, transcriber_id)
+  def find_transcripts_usage_for_month_of(dtim=DateTime.now, transcriber_ids)
 
     month_start = dtim.utc.beginning_of_month
     month_end = dtim.utc.end_of_month
     start_dtim = month_start.strftime('%Y-%m-%d %H:%M:%S')
     end_dtim   = month_end.strftime('%Y-%m-%d %H:%M:%S')
-
     # # NOTE we use collections, not billable_collections.
-    collection_ids = collections.pluck(:id)
-
+    collection_ids = collections.with_deleted.pluck(:id)
     # return a non-matching query if we have 0 collections.
     # this satisfies chained callers.
     return "select * from transcripts where id < 0" unless collection_ids.size > 0
 
     # transcriber_id may be an array
-    tids = transcriber_id
-    if transcriber_id.is_a?(Array)
-      tids = transcriber_id.join(',')
+    tids = transcriber_ids
+    if transcriber_ids.is_a?(Array)
+      tids = transcriber_ids.join(',')
     end
 
     items_sql = "select i.id from items as i where i.collection_id in (#{collection_ids.join(',')})"
@@ -201,7 +199,6 @@ module Billable
     total_secs = 0 
     total_cost = 0 
     total_retail_cost = 0 
-
     sql = find_transcripts_usage_for_month_of(dtim, transcriber_id)
     Transcript.find_by_sql(sql).each do |tr|
       af = tr.audio_file_lazarus
