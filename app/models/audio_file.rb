@@ -632,37 +632,9 @@ class AudioFile < ActiveRecord::Base
     unfinished_tasks = self.unfinished_tasks
     basic_transcript_tasks = unfinished_tasks.select{|t| t.type == "Tasks::TranscribeTask"}
     premium_transcript_tasks = unfinished_premium_transcribe_tasks
+
     if tscripts.size == 0 and !has_basic_transcribe_task_in_progress?(basic_transcript_tasks) and !has_premium_transcribe_task_in_progress?(premium_transcript_tasks)
       return true
-    end
-
-    # compare plan expectations with reality
-    if user && user.plan
-      user_plan = user.plan
-      # expect 2-minute preview only
-      if user_plan.is_basic_community?
-        return false
-      end
-      # expect premium transcript
-      if user_plan.has_premium_transcripts?
-        if has_premium_transcript?(tscripts)
-          return false
-        elsif has_premium_transcribe_task_in_progress?(premium_transcript_tasks)
-          return false
-        else
-          return true
-        end
-      end
-      # expect basic transcript
-      if !user_plan.has_premium_transcripts?
-        if has_basic_transcript?(tscripts)
-          return false
-        elsif has_basic_transcribe_task_in_progress?(basic_transcript_tasks)
-          return false
-        else
-          return true
-        end
-      end
     end
 
     return false
