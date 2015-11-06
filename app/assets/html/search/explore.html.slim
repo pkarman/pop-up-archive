@@ -101,8 +101,8 @@
         li ng-repeat="entry in facet.entries()"
           small.pull-right() ({{entry.count}})
           p ng-click="addSearchFilter(entry)" {{entry.nameForPresenting()}}
-        li
-          a ng-click="setQuery({field: facet.name, letter: 'A'}); toggleView()"  More...
+        / li
+        /   a ng-click="setQuery({field: facet.name, letter: 'A'}); toggleView()"  More...
   .container ng-show="newView"   
     .row
       .col-md-12
