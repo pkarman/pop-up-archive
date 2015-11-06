@@ -624,11 +624,8 @@ class AudioFile < ActiveRecord::Base
     tscripts.any?{|t| t.is_premium?}
   end
 
-  # returns true if audio still requires a basic or premium transcript. preview is excluded.
+  # returns true if audio still requires a basic or premium transcript
   def needs_transcript?(tscripts=self.transcripts_alone)
-    # if user has plan needing more than preview, 
-    # and there are no transcripts yet created, 
-    # and no tasks in process.
     unfinished_tasks = self.unfinished_tasks
     basic_transcript_tasks = unfinished_tasks.select{|t| t.type == "Tasks::TranscribeTask"}
     premium_transcript_tasks = unfinished_premium_transcribe_tasks
