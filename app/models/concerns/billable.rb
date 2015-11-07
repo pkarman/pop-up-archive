@@ -382,7 +382,7 @@ module Billable
   # NOTE that for Community plan users the current billing cycle == eternity.
   def hours_remaining
     if self.entity.plan.is_community?
-      self.entity.pop_up_hours - self.entity.premium_community_transcripts_usage.fdiv(3600)
+      self.entity.pop_up_hours - self.entity.premium_noncommunity_transcripts_usage.fdiv(3600)
     else
       self.entity.pop_up_hours - self.entity.premium_noncommunity_transcripts_usage.fdiv(3600)
     end 
