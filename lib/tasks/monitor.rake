@@ -72,59 +72,141 @@ namespace :monitor do
       end 
       if User.exists?(task.extras["user_id"])
         user_email = User.find(task.extras["user_id"]).email
-        user_combo = Hash.new {|h,k| h[k] = ''}
+        user_combo = {}
              
         if file != nil 
-          user_combo[file.id] = {}
-          user_combo[file.id]["audio_id"] = file.id
-          user_combo[file.id]["name"] = user_email
-          user_combo[file.id]["date_created"] = file.created_at
+          user_combo["audio_id"] = file.id
+          user_combo["name"] = user_email
+          user_combo["date_created"] = file.created_at
         end
         upload_not_complete_files<<user_combo
       end           
     end
-        
-    a = AudioFile.where(status_code: "G")
-        # .where("created_at>?", "11/15/2013")
-    with_owner=[]
-    
-    a.each do |f|
-            
-      if User.exists?(f.user_id) 
-        owner = User.find(f.user_id).email
-        user_combo={}
-        user_combo[f.id] = {}
-        user_combo[f.id]["audio_id"] = f.id
-        user_combo[f.id]["name"] = owner
-        user_combo[f.id]["date_created"] = f.created_at
-        with_owner << user_combo
+    destroy_now =[]
+    upload_not_complete_files.each do |i|
+      if AudioFile.exists?(i["audio_id"]) 
+        f = AudioFile.find(i["audio_id"])
+          #print deleted files to console
+          if f.created_at < Time.new(2013, 11, 15)
+            destroy_now << f
+            # AudioFile.destroy(f)
+          end
       end
     end
-    combo = with_owner + upload_not_complete_files
-    uniques = combo.inject([]) { |result,h| result << h unless result.include?(h); result } 
-    uniques.each do |key,value|
-      key.each do |k,v|
-        if AudioFile.exists?(v["audio_id"]) 
-          f = AudioFile.find(v["audio_id"])
-          #change time in new Time object to delete newer files
-          if f.created_at < Time.new(2013, 11, 15)
-            #uncomment next line to delete failed Uploads
-            # AudioFile.destroy(f)
-            puts f
+    p destroy_now.count
+    p destroy_now
+    file = "../Desktop/destroy_now.csv"
+    #This outputs list of audiofiles with failed upload tasks.
+    CSV.open(file, 'w') do |writer|
+      upload_not_complete_files.each do |i|
+          writer << [i["audio_id"], i["name"], i["date_created"], "www.popuparchive.com/collections/#{i['collection_id']}/items/#{i['item_id']}"] 
+        end
+      end
+    # end
+  end
+    
+  desc "generate transcripts for audio files with no transcripts"
+  task create_missing_transcripts: [:environment] do
+    all_files = AudioFile.where("duration>?", 5).select(:id, :created_at, :user_id, :item_id, :transcript, :original_file_url)
+    collect_files = []
+    all_files.each do |f|
+      if f.needs_transcript?
+        #check IA for those not uploaded
+        if (f.has_attribute?("original_file_url")) && (f.original_file_url != nil)
+          file_hash = {}
+          file_found=FileCleanupWorker.find_file(f.id)
+          file_hash["plays"] = "yes : 200" if file_found == 200
+          file_hash["plays"] = "check, 403 forbidden" if file_found == 403
+          file_hash["plays"] = "no : #{file_found}" if file_found == 404 || 401
+          # begin
+          #   file_found=HTTParty.head(f.original_file_url, follow_redirects: true, maintain_method_across_redirects: true, limit: 15)
+          #   case file_found.code
+          #     when 200
+          #       puts "Found #{f.id}"
+          #       file_hash["plays"] = "yes : 200"
+          #       # f.process_file
+          #     when 403
+          #       puts "Forbidden"
+          #       file_hash["plays"] = "check, 403 forbidden"
+          #     when 404 || 401
+          #       puts "Not found #{response.code}: #{f.id} #{f.original_file_url}"
+          #       file_hash["plays"] = "no : #{file_found}"
+          #     end
+          # rescue => e
+          #   p "unknown response"
+          # end
+          file_hash["audio_id"] = f.id 
+          file_hash["created_at"] = f .created_at
+          
+          if Item.exists?(f.item_id)
+            item = Item.find(f.item_id)
+            if Collection.exists?(item.collection_id)
+              col_id = item.collection_id
+              file_hash["url"] =  "www.popuparchive.com/collections/#{col_id}/items/#{item.id}"
+            end
+          end
+        
+          if User.exists?(f.user_id)
+            u = User.find(f.user_id)
+            file_hash["file_owner"] = u.entity.name
+            if u.plan.has_premium_transcripts?
+              file_hash["has_premium"] = "Premium"
+            else  
+              file_hash["has_premium"] = "Basic"
+            end
+          else
+            file_hash["file_owner"] = nil
+            file_hash["has_premium"] = "none"
+          end
+          collect_files << file_hash
+        
+        #for uploaded files with no transcripts
+        else 
+          uploaded = false
+          if f.is_uploaded?
+            uploaded = true
+          end
+          if uploaded == true
+            file_hash = {} 
+            file_hash["audio_id"] = f.id 
+            file_hash["created_at"] = f.created_at
+            file_hash["plays"] = "manual check"
+            if Item.exists?(f.item_id)
+              item = Item.find(f.item_id)
+              if Collection.exists?(item.collection_id)
+                col_id = item.collection_id
+                file_hash["url"] =  "www.popuparchive.com/collections/#{col_id}/items/#{item.id}"
+              end
+            end
+            if User.exists?(f.user_id)
+              u = User.find(f.user_id)
+              file_hash["file_owner"] = u.entity.name
+              if u.plan.has_premium_transcripts?
+                file_hash["has_premium"] = "Premium"
+              else 
+                file_hash["has_premium"] = "none"
+              end
+            else 
+              file_hash["file_owner"] = nil
+              file_hash["has_premium"] = "none"
+            end
+            #f.process_file
+            collect_files << file_hash
           end
         end
-      end
+      end          
     end
-    file = "../Desktop/output_files_users_empty.csv"
-    p uniques.count
-    #This outputs list of audiofiles with failed upload tasks or with "G" status, with user emails. 
-    #Set specific time constraints for deletion on line 115.
+    p collect_files
+    p collect_files.count
+    
+    file = "../Desktop/transcripts.csv"
+
     CSV.open(file, 'w') do |writer|
-      uniques.each do |i|
-        i.each do |key, value|
-          writer << [value["audio_id"], value["name"], value["date_created"], "www.popuparchive.com/collections/#{value['collection_id']}/items/#{value['item_id']}"] 
-        end
+      writer << ["AudioFile ID", "Date Created", "Owner", "Transcript Type", "url", "found/plays"]
+      collect_files.each do |i|
+          writer << [i["audio_id"], i["created_at"], i["file_owner"], i["has_premium"], i["url"], i["plays"]] 
       end
     end
   end
-end
+end 
+
