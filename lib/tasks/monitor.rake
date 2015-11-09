@@ -2,7 +2,8 @@ require 'csv'
 
 namespace :monitor do
   desc "updating feeds"
-  #Oldest entry as '1900-01-01'
+  #rake monitor:feed[FEED_URL,COLLECTION_ID,OLDEST_ENTRY]
+  #Example: rake monitor:feed[http://examplefeed.com,938,2015-11-08]
   task :feed, [:url, :collection_id, :oldest_entry] => [:environment] do |t, args|
     puts "Scheduling new feed check: #{args.url}"
     account_holder = Collection.find(args.collection_id).creator.entity
