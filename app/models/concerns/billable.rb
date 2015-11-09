@@ -382,9 +382,9 @@ module Billable
   # NOTE that for Community plan users the current billing cycle == eternity.
   def hours_remaining
     if self.entity.plan.is_community?
-      self.entity.pop_up_hours - self.entity.premium_noncommunity_transcripts_usage.fdiv(3600)
+      self.entity.pop_up_hours - self.entity.premium_transcripts_usage.fdiv(3600)
     else
-      self.entity.pop_up_hours - self.entity.premium_noncommunity_transcripts_usage.fdiv(3600)
+      self.entity.pop_up_hours - self.entity.premium_transcripts_usage.fdiv(3600) + self.entity.premium_community_transcripts_usage.fdiv(3600)
     end 
   end
 
@@ -392,11 +392,11 @@ module Billable
   # subscription plan was community
   def premium_community_transcripts_usage
     comm_plan_id = SubscriptionPlanCached.community.as_plan.id
-    return if plan.id == comm_plan_id
     premium_ids = Transcriber.ids_for_type('premium')
+    sql = entity.find_transcripts_usage_for_month_of(DateTime.now, premium_ids)
+    # abort early if we have no transcripts
+    return 0 unless sql
     total_secs = 0
-    sql = find_transcripts_usage_for_month_of(DateTime.now, premium_ids)
-    return unless sql
     Transcript.find_by_sql(sql).each do |tr|
       next unless tr.subscription_plan_id == comm_plan_id
       af = tr.audio_file_lazarus
@@ -406,18 +406,14 @@ module Billable
   end
 
   # returns total transcript duration for current month
-  # for non-community subscription plans.
-  def premium_noncommunity_transcripts_usage(dtim=DateTime.now)
+  def premium_transcripts_usage(dtim=DateTime.now)
     comm_plan_id = SubscriptionPlanCached.community.as_plan.id
     premium_ids = Transcriber.ids_for_type('premium')
-    sql = find_transcripts_usage_for_month_of(dtim, premium_ids)
-
+    sql = entity.find_transcripts_usage_for_month_of(dtim, premium_ids)
     # abort early if we have no transcripts
-    return 0 if !sql
-
+    return 0 unless sql
     total_secs = 0
     Transcript.find_by_sql(sql).each do |tr|
-      next if tr.subscription_plan_id == comm_plan_id
       af = tr.audio_file_lazarus
       total_secs += tr.billable_seconds(af)
     end 
