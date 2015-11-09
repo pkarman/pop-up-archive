@@ -14,7 +14,6 @@ namespace :monitor do
     end
         
     if ENV['NOW']
-      puts "that next didn't work"
       FeedPopUp.update_from_feed(args.url, args.collection_id, ENV['DRY_RUN'], (args.oldest_entry || ENV['OLDEST_ENTRY']))
     else
       FeedUpdateWorker.perform_async(args.url, args.collection_id, (args.oldest_entry || ENV['OLDEST_ENTRY']))
