@@ -6,7 +6,7 @@ describe Tasks::SpeechmaticsTranscribeTask do
   after { StripeMock.stop }
 
   let(:user) { FactoryGirl.create :user }
-  let(:audio_file) { FactoryGirl.create(:audio_file_private) }
+  let(:audio_file) { FactoryGirl.create :audio_file_private, user_id: user.id }
   let(:task) { Tasks::SpeechmaticsTranscribeTask.new(owner: audio_file, extras: {'user_id' => user.id}) }
 
   let(:response) {
@@ -166,6 +166,7 @@ describe Tasks::SpeechmaticsTranscribeTask do
       now = DateTime.now
 
       # test user must own the collection, since usage is limited to billable ownership.
+      user.collections << audio_file.item.collection
       audio_file.item.collection.set_owner(user)
 
       user.usage_for(MonthlyUsage::PREMIUM_TRANSCRIPTS).should == 0
@@ -174,12 +175,10 @@ describe Tasks::SpeechmaticsTranscribeTask do
       
       # audio_file must have the transcript, since transcripts are the billable items.
       audio_file.transcripts << t.process_transcript(response)
-
       t.user_id.should eq user.id.to_s
       t.extras['entity_id'].should eq user.entity.id
       t.update_premium_transcript_usage(now).should eq 60
       user.usage_for(MonthlyUsage::PREMIUM_TRANSCRIPTS).should eq 60
-
     end
 
     it "assigns retail cost for ondemand" do

@@ -11,3 +11,4 @@
 :queues:
   - [default, 5]
   - [elasticsearch, 5]
+  - [google_analytics, 1]

@@ -33,10 +33,12 @@ if current_user
   node(:used_unmetered_storage) { current_user.used_unmetered_storage_cache }
   node(:total_metered_storage) { current_user.pop_up_hours * 3600 }
   node(:usage) { { summary: current_user.usage_summary, transcripts: [] } }
-  node(:over_monthly_limit) { current_user.is_over_monthly_limit? }
   if !current_user.organization_id
-    node(:community_plan_used) { current_user.premium_community_transcripts_usage } 
+    node(:over_monthly_limit) { current_user.is_over_monthly_limit? }
+  else 
+    node(:over_monthly_limit) { current_user.organization.is_over_monthly_limit? }
   end
+  node(:community_plan_used) { current_user.premium_community_transcripts_usage } 
   node(:offer_ended) { current_user.is_offer_ended? }
   node(:plan) { current_user.plan_json }
   node(:credit_card) { current_user.active_credit_card_json } if current_user.active_credit_card.present?

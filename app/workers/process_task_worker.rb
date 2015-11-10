@@ -3,7 +3,7 @@
 class ProcessTaskWorker
   include Sidekiq::Worker
 
-  sidekiq_options :retry => 25
+  sidekiq_options :retry => 25, unique: :until_and_while_executing
 
   def perform(task_id)
     ActiveRecord::Base.connection_pool.with_connection do

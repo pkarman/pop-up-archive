@@ -18,7 +18,7 @@ module Billable
     return [] unless billable_collection_ids.size > 0
     items_sql = "select i.id from items as i where i.collection_id in (#{billable_collection_ids.join(',')})"
     audio_files_sql = "select * from audio_files as af where af.duration is not null and af.item_id in (#{items_sql})"
-    AudioFile.find_by_sql(audio_files_sql)
+    AudioFile.with_deleted.find_by_sql(audio_files_sql)
   end
 
   # unlike normal audio_files association, which includes all records the User/Org is authorized to see,
@@ -78,60 +78,69 @@ module Billable
     }
   end
 
-  # returns SQL string for selecting the Transcript objects in the given time period and transcriber
-  def sql_for_billable_transcripts_for_month_of(dtim=DateTime.now, transcriber_id)
+  # # returns SQL string for selecting the Transcript objects in the given time period and transcriber
+  # def sql_for_billable_transcripts_for_month_of(dtim=DateTime.now, transcriber_id)
 
-    # hand-roll sql to optimize query.
-    # there might be a way to do this all with activerecord but my activerecord-fu is weak.
+  #   # hand-roll sql to optimize query.
+  #   # there might be a way to do this all with activerecord but my activerecord-fu is weak.
+  #   month_start = dtim.utc.beginning_of_month
+  #   month_end = dtim.utc.end_of_month
+  #   start_dtim = month_start.strftime('%Y-%m-%d %H:%M:%S')
+  #   end_dtim   = month_end.strftime('%Y-%m-%d %H:%M:%S')
+
+  #   billable_collection_ids = billable_collections.map { |c| c.id.to_s }
+
+  #   # return a non-matching query if we have 0 collections.
+  #   # this satisfies chained callers.
+  #   return "select * from transcripts where id < 0" unless billable_collection_ids.size > 0
+
+  #   # transcriber_id may be an array
+  #   tids = transcriber_id
+  #   if transcriber_id.is_a?(Array)
+  #     tids = transcriber_id.join(',')
+  #   end
+
+  #   items_sql = "select i.id from items as i where i.collection_id in (#{billable_collection_ids.join(',')})"
+  #   audio_files_sql = "select af.id from audio_files as af where af.duration is not null and af.item_id in (#{items_sql})"
+  #   transcripts_sql = "select * from transcripts as t where t.transcriber_id in (#{tids}) and t.audio_file_id in (#{audio_files_sql})"
+  #   transcripts_sql += " and t.created_at between '#{start_dtim}' and '#{end_dtim}'"
+  #   transcripts_sql += " and t.is_billable=true"
+  #   transcripts_sql += " order by t.created_at asc"
+  #   return transcripts_sql
+  # end
+
+  # this returns transcript usage by user or organization for a given month based on transcriber id
+  # paid transcriber ids are 2 and 3
+  def find_transcripts_usage_for_month_of(dtim=DateTime.now, transcriber_ids)
+
     month_start = dtim.utc.beginning_of_month
     month_end = dtim.utc.end_of_month
     start_dtim = month_start.strftime('%Y-%m-%d %H:%M:%S')
     end_dtim   = month_end.strftime('%Y-%m-%d %H:%M:%S')
-
-    billable_collection_ids = billable_collections.map { |c| c.id.to_s }
-
+    # # NOTE we use collections, not billable_collections.
+    collection_ids = collections.with_deleted.pluck(:id)
     # return a non-matching query if we have 0 collections.
     # this satisfies chained callers.
-    return "select * from transcripts where id < 0" unless billable_collection_ids.size > 0
+    return "select * from transcripts where id < 0" unless collection_ids.size > 0
 
     # transcriber_id may be an array
-    tids = transcriber_id
-    if transcriber_id.is_a?(Array)
-      tids = transcriber_id.join(',')
+    tids = transcriber_ids
+    if transcriber_ids.is_a?(Array)
+      tids = transcriber_ids.join(',')
     end
 
-    items_sql = "select i.id from items as i where i.collection_id in (#{billable_collection_ids.join(',')})"
-    audio_files_sql = "select af.id from audio_files as af where af.duration is not null and af.item_id in (#{items_sql})"
+    items_sql = "select i.id from items as i where i.collection_id in (#{collection_ids.join(',')})"
+    if self.is_a?(Organization)
+      audio_files_sql = "select af.id from audio_files as af where af.duration is not null and af.item_id in (#{items_sql})"
+    else
+      audio_files_sql = "select af.id from audio_files as af where af.user_id=#{self.id} and af.duration is not null and af.item_id in (#{items_sql})"
+    end
+
     transcripts_sql = "select * from transcripts as t where t.transcriber_id in (#{tids}) and t.audio_file_id in (#{audio_files_sql})"
     transcripts_sql += " and t.created_at between '#{start_dtim}' and '#{end_dtim}'"
     transcripts_sql += " and t.is_billable=true"
     transcripts_sql += " order by t.created_at asc"
-
     return transcripts_sql
-  end
-
-  # this references self.id so currently only applicable/accurate for User objects.
-  def find_transcripts_usage_for_month_of(dtim=DateTime.now, transcriber_id)
-    Rails.logger.debug "********************************************************"
-    Rails.logger.debug self
-    return if self.is_a?(Organization)
-
-    month_start = dtim.utc.beginning_of_month
-    month_end = dtim.utc.end_of_month
-    start_dtim = month_start.strftime('%Y-%m-%d %H:%M:%S')
-    end_dtim   = month_end.strftime('%Y-%m-%d %H:%M:%S')
-
-    # NOTE we use collections, not billable_collections.
-    collection_ids = collections.map { |c| c.id }
-
-    # abort early if we have no collections
-    return nil if collection_ids.size == 0
-
-    items=Item.where({collection_id: collection_ids}).pluck(:id)
-    audio_files=AudioFile.where({item_id: items}).where("duration > 0").pluck(:id)
-    transcripts=Transcript.where({audio_file_id: audio_files}).where("created_at >= ? AND created_at <= ?", start_dtim, end_dtim).where(transcriber_id: transcriber_id).where(is_billable: true)
-    transcripts = transcripts.order(:created_at)
-    return transcripts
   end
 
   # limit (optional) should be a DateTime object
@@ -153,12 +162,10 @@ module Billable
     # apply limit for one month only
       trs = []
       transcriber_ids = Transcriber.select(['id']).map(&:id)
-      transcriber_ids.each do |tr_id|
-        sql = self.sql_for_billable_transcripts_for_month_of(limit, tr_id)
-        Transcript.find_by_sql(sql).each do |tr|
-          af = tr.audio_file_lazarus
-          trs.push tr.as_usage_summary(af)
-        end
+      sql = self.find_transcripts_usage_for_month_of(limit, transcriber_ids)
+      Transcript.find_by_sql(sql).each do |tr|
+        af = tr.audio_file_lazarus
+        trs.push tr.as_usage_summary(af)
       end
       usage[limit.strftime('%Y-%m')] = trs
     end
@@ -171,12 +178,8 @@ module Billable
     total_secs = 0
     total_cost = 0
     total_retail_cost = 0
-
-    sql = self.sql_for_billable_transcripts_for_month_of(dtim, transcriber_id)
-
-    # abort early if we have no valid SQL
-    return { :seconds => 0, :cost => 0, :retail_cost => 0 } if !sql
-
+    
+    sql = find_transcripts_usage_for_month_of(dtim, transcriber_id)
     Transcript.find_by_sql(sql).each do |tr|
       af = tr.audio_file_lazarus
       total_secs += tr.billable_seconds(af)
@@ -193,21 +196,11 @@ module Billable
   # we do, however, pay attention to whether the audio_file is linked directly, so this method is really
   # only useful (at the moment) for User objects, esp Users belonging to an Organization.
   def transcripts_usage_for_month_of(dtim=DateTime.now, transcriber_id)
-    if self.is_a?(Organization)
-      raise "Currently transcripts_usage_for_month_of() only available to User class. You called on #{self.inspect}"
-    end
     total_secs = 0 
     total_cost = 0 
     total_retail_cost = 0 
-
-    Rails.logger.debug "transcripts_usage_for_month_of"
-
-    transcripts = find_transcripts_usage_for_month_of(dtim, transcriber_id)
-
-    # abort early if we have no valid SQL
-    return { :seconds => 0, :cost => 0, :retail_cost => 0 } if !transcripts
-
-    transcripts.each do |tr|
+    sql = find_transcripts_usage_for_month_of(dtim, transcriber_id)
+    Transcript.find_by_sql(sql).each do |tr|
       af = tr.audio_file_lazarus
       total_secs += tr.billable_seconds(af)
       total_cost += tr.cost(af)
@@ -217,18 +210,7 @@ module Billable
     # cost_per_min is in 1000ths of a dollar, not 100ths (cents)
     # but we round to the nearest penny when we cache it in aggregate.
     return { :seconds => total_secs, :cost => total_cost.fdiv(1000), :retail_cost => total_retail_cost.fdiv(1000) }
-  end 
-
-  def my_audio_file_storage(metered=true)
-    total_secs = 0
-    my_audio_files.each do |af|
-      next unless af.duration
-      if af.metered == metered
-        total_secs += af.duration
-      end
-    end
-    return total_secs
-  end 
+  end  
 
   def usage_for(use, now=DateTime.now)
     monthly_usages.where(use: use, year: now.utc.year, month: now.utc.month).sum(:value)
@@ -282,26 +264,6 @@ module Billable
     @_used_premium_transcripts ||= total_transcripts_report(:premium)
   end
 
-  def get_total_seconds(ttype)
-    ttype_s = ttype.to_s
-    methname = 'used_' + ttype_s + '_transcripts'
-    if transcript_usage_cache.has_key?(ttype_s+'_seconds')
-      return transcript_usage_cache[ttype_s+'_seconds'].to_i
-    else
-      return send(methname)[:seconds].to_i
-    end
-  end
-
-  def get_total_cost(ttype)
-    ttype_s = ttype.to_s
-    methname = 'used_' + ttype_s + '_transcripts'
-    if transcript_usage_cache.has_key?(ttype_s+'_cost')
-      return transcript_usage_cache[ttype_s+'_cost'].to_f
-    else
-      return send(methname)[:cost].to_f
-    end
-  end
-
   # Returns JSON-ready hash of monthly usage, including on-demand charges.
   # NOTE that for the purposes of billing, we ignore the 'cost' and 'retail_cost'
   # of the monthly usage records and instead look at (a) overages and (b) ondemand (premium usage on a basic plan).
@@ -317,7 +279,7 @@ module Billable
     month = now.utc.month
     thismonth = sprintf("%d-%02d", year, month)
     summary[:this_month][:period] = thismonth
-    monthly_usages.order('"yearmonth" desc, "use" asc').each do |mu|
+    monthly_usages.order('"yearmonth" desc, "use" asc').slice(0,48).each do |mu|
       msum = { 
         period: mu.yearmonth,
         type:   mu.use,
@@ -396,25 +358,6 @@ module Billable
     self.entity.hours_remaining <= 0.0
   end
 
-  def is_within_sight_of_monthly_limit?
-    summ      = self.entity.usage_summary
-    threshold = (plan.hours * 0.85).to_f
-    if summ[:this_month][:hours] > threshold
-      return true
-    else
-      return false
-    end
-  end
-
-  def send_usage_alert
-    subject = 'ALERT: Your Pop Up Archive usage is nearing its limit'
-    summ = self.entity.usage_summary
-    plan_hours = plan.hours
-    body    = sprintf("You have used %d (%d%%) of your monthly limit of %d hours.", \
-                summ[:this_month][:hours], ((summ[:this_month][:hours] / plan_hours) * 100), plan_hours)
-    MyMailer.usage_alert(subject, body, self.entity.owner.email).deliver
-  end
-
   def prorated_charge_for_month(dtim)
     # get number of days active in the month
     days_in_month = dtim.end_of_month.strftime('%d').to_i
@@ -439,61 +382,101 @@ module Billable
   # NOTE that for Community plan users the current billing cycle == eternity.
   def hours_remaining
     if self.entity.plan.is_community?
-      self.entity.pop_up_hours - self.entity.premium_community_transcripts_usage.fdiv(3600)
+      self.entity.pop_up_hours - self.entity.premium_transcripts_usage.fdiv(3600)
     else
-      self.entity.pop_up_hours - self.entity.premium_noncommunity_transcripts_usage.fdiv(3600)
+      self.entity.pop_up_hours - self.entity.premium_transcripts_usage.fdiv(3600) + self.entity.premium_community_transcripts_usage.fdiv(3600)
     end 
   end
 
-  # return total transcript duration for all months where
+  # if user upgrades from community plan return usage for portion of month where
   # subscription plan was community
   def premium_community_transcripts_usage
     comm_plan_id = SubscriptionPlanCached.community.as_plan.id
     premium_ids = Transcriber.ids_for_type('premium')
+    sql = entity.find_transcripts_usage_for_month_of(DateTime.now, premium_ids)
+    # abort early if we have no transcripts
+    return 0 unless sql
     total_secs = 0
-    monthly_usages.each do |mu|
-      next unless mu.value > 0
-      dtim = DateTime.parse(mu.yearmonth+'-01')
-
-      Rails.logger.debug "premium_community_transcripts_usage"
-      transcripts = find_transcripts_usage_for_month_of(dtim, premium_ids)
-      next unless transcripts
-      transcripts.each do |tr|
-        next unless tr.subscription_plan_id == comm_plan_id
-        af = tr.audio_file_lazarus
-        total_secs += tr.billable_seconds(af)
-      end
+    Transcript.find_by_sql(sql).each do |tr|
+      next unless tr.subscription_plan_id == comm_plan_id
+      af = tr.audio_file_lazarus
+      total_secs += tr.billable_seconds(af)
     end
     total_secs
   end
 
   # returns total transcript duration for current month
-  # for non-community subscription plans.
-  def premium_noncommunity_transcripts_usage(dtim=DateTime.now)
+  def premium_transcripts_usage(dtim=DateTime.now)
     comm_plan_id = SubscriptionPlanCached.community.as_plan.id
     premium_ids = Transcriber.ids_for_type('premium')
-    Rails.logger.debug "premium_noncommunity_transcripts_usage"
-    transcripts = find_transcripts_usage_for_month_of(dtim, premium_ids)
-
-    # abort early if we have no valid SQL
-    return 0 if !transcripts
-
+    sql = entity.find_transcripts_usage_for_month_of(dtim, premium_ids)
+    # abort early if we have no transcripts
+    return 0 unless sql
     total_secs = 0
-    transcripts.each do |tr|
-      next if tr.subscription_plan_id == comm_plan_id
+    Transcript.find_by_sql(sql).each do |tr|
       af = tr.audio_file_lazarus
       total_secs += tr.billable_seconds(af)
     end 
     total_secs
   end
 
-  def hours_used_in_month(dtim=DateTime.now)
-    secs = 0 
-    this_month = dtim.strftime('%Y-%m')
-    monthly_usages.where(yearmonth: this_month).each do |mu|
-      secs += mu.value
-    end 
-    secs.fdiv(3600)
-  end
+  # def my_audio_file_storage(metered=true)
+  #   total_secs = 0
+  #   my_audio_files.each do |af|
+  #     next unless af.duration
+  #     if af.metered == metered
+  #       total_secs += af.duration
+  #     end
+  #   end
+  #   return total_secs
+  # end
+
+  # def get_total_seconds(ttype)
+  #   ttype_s = ttype.to_s
+  #   methname = 'used_' + ttype_s + '_transcripts'
+  #   if transcript_usage_cache.has_key?(ttype_s+'_seconds')
+  #     return transcript_usage_cache[ttype_s+'_seconds'].to_i
+  #   else
+  #     return send(methname)[:seconds].to_i
+  #   end
+  # end
+
+  # def get_total_cost(ttype)
+  #   ttype_s = ttype.to_s
+  #   methname = 'used_' + ttype_s + '_transcripts'
+  #   if transcript_usage_cache.has_key?(ttype_s+'_cost')
+  #     return transcript_usage_cache[ttype_s+'_cost'].to_f
+  #   else
+  #     return send(methname)[:cost].to_f
+  #   end
+  # end
+
+  # def is_within_sight_of_monthly_limit?
+  #   summ      = self.entity.usage_summary
+  #   threshold = (plan.hours * 0.85).to_f
+  #   if summ[:this_month][:hours] > threshold
+  #     return true
+  #   else
+  #     return false
+  #   end
+  # end
+
+  # def send_usage_alert
+  #   subject = 'ALERT: Your Pop Up Archive usage is nearing its limit'
+  #   summ = self.entity.usage_summary
+  #   plan_hours = plan.hours
+  #   body    = sprintf("You have used %d (%d%%) of your monthly limit of %d hours.", \
+  #               summ[:this_month][:hours], ((summ[:this_month][:hours] / plan_hours) * 100), plan_hours)
+  #   MyMailer.usage_alert(subject, body, self.entity.owner.email).deliver
+  # end
+
+  # def hours_used_in_month(dtim=DateTime.now)
+  #   secs = 0 
+  #   this_month = dtim.strftime('%Y-%m')
+  #   monthly_usages.where(yearmonth: this_month).each do |mu|
+  #     secs += mu.value
+  #   end 
+  #   secs.fdiv(3600)
+  # end
 
 end

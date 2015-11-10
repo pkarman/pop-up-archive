@@ -29,9 +29,9 @@ namespace :reports do
     progress.send(:show)
     User.find_each do |user|
       user.update_usage_report!
-      if ENV['SEND_ALERTS'] && user.is_within_sight_of_monthly_limit? && !user.plan.is_community?
-        user.send_usage_alert
-      end
+      # if ENV['SEND_ALERTS'] && user.is_within_sight_of_monthly_limit? && !user.plan.is_community?
+      #   user.send_usage_alert
+      # end
       progress.inc
     end
     progress.finish
@@ -47,9 +47,9 @@ namespace :reports do
     progress.send(:show)
     Organization.find_each do |org|
       org.update_usage_report!
-      if ENV['SEND_ALERTS'] && org.is_within_sight_of_monthly_limit? && !org.owner.plan.is_community?
-        org.send_usage_alert
-      end
+      # if ENV['SEND_ALERTS'] && org.is_within_sight_of_monthly_limit? && !org.owner.plan.is_community?
+      #   org.send_usage_alert
+      # end
       progress.inc
     end
     progress.finish

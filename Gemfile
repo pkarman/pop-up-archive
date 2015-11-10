@@ -61,6 +61,7 @@ gem 'rabl'
 
 # background processing
 gem 'sidekiq'
+gem 'sidekiq-unique-jobs'
 
 # misc
 gem 'copyrighter'

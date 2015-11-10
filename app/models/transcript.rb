@@ -11,6 +11,7 @@ class Transcript < ActiveRecord::Base
   default_scope -> { includes(:timed_texts) }
 
   after_save :update_item
+  after_update :update_usage, if: :is_billable_changed?
 
   RETAIL    = 2 
   WHOLESALE = 1 
@@ -290,6 +291,10 @@ class Transcript < ActiveRecord::Base
 
   def format_time(seconds)
     Time.at(seconds).getgm.strftime('%H:%M:%S')
+  end
+
+  def update_usage
+    audio_file.user.calculate_monthly_usages!
   end
 
 end

@@ -101,7 +101,9 @@ describe User do
 
     it "counts deleted audio toward monthly usage" do
       audio_persist = FactoryGirl.create(:audio_file_private)
+      audio_persist.user = audio_persist.billable_to
       audio_deleted = FactoryGirl.create(:audio_file_private)
+      audio_deleted.user = audio_deleted.billable_to
       audio_persist_transcript = FactoryGirl.create :transcript
       audio_deleted_transcript = FactoryGirl.create :transcript
       # factory transcripts are created as orphans. must assign audio explicitly.
@@ -118,14 +120,18 @@ describe User do
       audio_deleted.save!
       audio_persist_user = audio_persist.item.collection.billable_to
       audio_deleted_user = audio_deleted.item.collection.billable_to
-      #STDERR.puts "audio_persist = #{audio_persist.inspect}"
-      #STDERR.puts "audio_persist.user = #{audio_persist.user.inspect}"
-      #STDERR.puts "audio_persist.item.collection.billable_to = #{audio_persist.item.collection.billable_to.inspect}"
-      #STDERR.puts "audio_deleted = #{audio_deleted.inspect}"
-      #STDERR.puts "audio_deleted.user = #{audio_deleted.user.inspect}"
-      #STDERR.puts "audio_deleted.item.collection.billable_to = #{audio_deleted.item.collection.billable_to.inspect}"
-      #STDERR.puts "audio_persist_transcript = #{audio_persist_transcript.inspect}"
-      #STDERR.puts "audio_deleted_transcript = #{audio_deleted_transcript.inspect}"
+      # STDERR.puts "audio_persist = #{audio_persist.inspect}"
+      # STDERR.puts "audio_persist.user = #{audio_persist.user.inspect}"
+      # STDERR.puts "audio_persist.item.collection.billable_to = #{audio_persist.item.collection.billable_to.inspect}"
+      # STDERR.puts "audio_deleted = #{audio_deleted.inspect}"
+      # puts "deleted collection:"
+      # puts audio_deleted.item.collection_id
+      # puts "persist collection:"
+      # puts audio_persist.item.collection_id
+      # STDERR.puts "audio_deleted.user = #{audio_deleted.user.inspect}"
+      # STDERR.puts "audio_deleted.item.collection.billable_to = #{audio_deleted.item.collection.billable_to.inspect}"
+      # STDERR.puts "audio_persist_transcript = #{audio_persist_transcript.inspect}"
+      # STDERR.puts "audio_deleted_transcript = #{audio_deleted_transcript.inspect}"
       audio_persist_transcript.billable_seconds.should eq 3600
       audio_deleted_transcript.billable_seconds.should eq 3600
       audio_persist_transcript.billable_to.should eq audio_persist_user
@@ -145,13 +151,14 @@ describe User do
       audio_deleted_user.calculate_monthly_usages!
       audio_deleted_user.update_usage_report!
       audio_deleted_user.usage_summary[:this_month][:hours].should eq 1.0
-      #STDERR.puts "audio_deleted = #{audio_deleted.inspect}"
+      # STDERR.puts "audio_deleted = #{audio_deleted.inspect}"
       Rails.logger.warn("-------------------------------- DELETED AUDIO TEST COMPLETE ----------------------------------")
             
     end
 
     it "counts deleted collection toward monthly usage" do
       audio = FactoryGirl.create(:audio_file_private)
+      audio.user = audio.billable_to
       audio.duration = 3600
       transcript = FactoryGirl.create :transcript
       transcript.transcriber = Transcriber.basic
@@ -167,15 +174,15 @@ describe User do
       user.usage_summary[:this_month][:hours].should eq 1.0
 
       # delete and try again
-      #Rails.logger.warn("------------ DESTROY collection ----------------")
+      Rails.logger.warn("------------ DESTROY collection ----------------")
       audio.item.collection.destroy
-      #STDERR.puts "audio.destroyed? == #{audio.destroyed?}"
-      #STDERR.puts "item.destroyed?  == #{audio.item.destroyed?}"
-      #Rails.logger.warn("------------ DESTROY complete ------------------")
+      # STDERR.puts "audio.destroyed? == #{audio.destroyed?}"
+      # STDERR.puts "item.destroyed?  == #{audio.item.destroyed?}"
+      Rails.logger.warn("------------ DESTROY complete ------------------")
 
       user.calculate_monthly_usages!
       user.update_usage_report!
-      #STDERR.puts user.usage_summary.inspect
+      # STDERR.puts user.usage_summary.inspect
       user.usage_summary[:this_month][:hours].should eq 1.0
     end
 
@@ -202,7 +209,7 @@ describe User do
       user.usage_summary[:this_month][:hours].should eq 1.0  # only 1 of 2 hours billable
     end
 
-    it "calculates Community plan usage regardless of month" do
+    it "calculates Community plan usage for current month" do
       audio = FactoryGirl.create(:audio_file_private)
       audio.user = audio.billable_to # override factory default
       user = audio.billable_to
@@ -230,7 +237,7 @@ describe User do
       user.plan.is_community?().should be_truthy
       user.hours_remaining.should eq 0.75  # only one transcript counted
       Timecop.travel( 90.days.from_now.to_i )
-      user.hours_remaining.should eq 0.75
+      user.hours_remaining.should eq 1.0
       Timecop.return
     end
 

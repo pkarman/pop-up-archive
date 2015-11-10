@@ -40,9 +40,11 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
   def build_resource(*args)
     session[:plan_id] = params[:plan_id] if params[:plan_id].present?    
+    session[:plan_id] = "premium_community" if params[:plan_id] == "community"
     session[:card_token] = params[:card_token] if params[:card_token].present?
     session[:offer_code] = params[:offer_code] if params[:offer_code].present?
     super
+
   end
 
   def update_sign_up_filter
@@ -125,5 +127,5 @@ class Users::RegistrationsController < Devise::RegistrationsController
       logger.error "Mixpanel registration error."
     end
   end
-  
+
 end

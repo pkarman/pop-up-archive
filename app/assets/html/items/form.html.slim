@@ -8,127 +8,130 @@ section.modal ng-controller="ItemFormCtrl"
         h3 ng-hide='(item.id > 0) || !showForm()' Create an Audio Item
     
       .modal-body
+        
         h3 ng-show="currentUser.offerEnded && !currentUser.hasCreditCard()"
           | Your free trial has ended.
           a href="/account/plan"  Upgrade now!
         h3 ng-show="currentUser.overMonthlyLimit && !currentUser.isOrgMember()"
-         | You are over your monthly limit.
-         a href="/account/plan"  Upgrade now!
+          | You are over your monthly limit.
+          a href="/account/plan"  Upgrade now!
         h3 ng-show="currentUser.overMonthlyLimit && currentUser.isOrgMember()"
-         | You are over your organization's monthly limit.
-        form.item-form.form-horizontal name='newItemForm' ng-show="showForm() && !currentuser.overMonthlyLimit"
-    
-          div.form-group.remote-item ng-hide="item.id > 0 || !item.mayUploadFile()" style="text-align:center;"
-            h3 Drag and drop a file anywhere on the site
-            div style="margin:-10px 0 10px 0;" or
-            span file-button="" style='margin-right: 4px;'
-              button.btn.btn-default.btn-lg.upload-file-button style="margin-bottom:5px;" Upload one file at a time
-            div style="margin:0 0 10px 0;" or
-            input.text.input.remote-item-url type='text' placeholder="Insert Url"
-            span style='margin: 4px;'
-              button.btn.btn-default.btn-lg ng-click="addItemFromURL($event)" style="margin-bottom:10px;" Add Files by URL
-    
-            .alert.alert-warning 
-              p
-               | Periods not allowed in file names. (For example, episode1.wav, and 
-               strong not 
-               | episode.1.wav.) 
-    
-          section ng-show='(item.id > 0) || (item.mayUploadFile())'
-    
-            .alert.alert-danger ng-show="(item.files.length > 1) && showFilesAlert"
-              a ng-click="hideAlert()" style='text-decoration: none; color: #da4f49; float: right; margin-right: -20px;' 
-                i.fa.fa-remove
-              p 
-                | Multiple files are not supported.
-              p
-                strong
-                  | For separate playback of each file, delete extra files and upload one at a time.
-
-            .form-group ng-show="item.mayUploadFile()"
-              label.control-label
-                | Upload File
-                i.fa.fa-question-circle style="margin-left:8px" bs-popover="itemHelp['audioFiles']" data-placement="bottom" html="true" auto-close="true"
-              .controls ng-hide="item.files.length > 0"
-                label.pull-left style='padding-top: 5px;'
-                  i No files to upload.
-              .controls ng-show="item.files.length > 0"
-                table.table.file-table
-                  tr.file ng-repeat="audioFile in item.files"
-                    td.file-icon
-                      .item-thumb ng-class="iconForFile(audioFile)"
-                    td.file-name alt="{{audioFile.name}}" {{audioFile.name}}
-                    td.file-size() {{readableFileSize(audioFile.size)}}
-                    td.file-remove
-                      a href="#" ng-click="removeAudioFile(audioFile)" style='text-decoration: none; color: #da4f49;'
-                        i.fa.fa-times-circle
-                
-              .clearfix.controls ng-hide="item.files.length > 0"
-                span.pull-right file-button=""
-                  button.btn.btn-default.upload-file-button Add Files to Item
-    
-            .form-group ng-show="item.mayUploadFile()"
-              label.control-label
-                | Add File
-                i.fa.fa-question-circle style="margin-left:8px" bs-popover="itemHelp['audioFiles[][remoteFileUrl]']" data-placement="bottom" html="true" auto-close="true"
-              .controls ng-show="remoteFileUrls && remoteFileUrls.length > 0"
-                table.table.file-table
-                  tr.file ng-repeat="remoteFileUrl in remoteFileUrls"
-                    td.file-icon
-                      .item-thumb ng-class="iconForFile(remoteFileUrl)"
-                    td.file-name() {{remoteFileUrl}}
-                    td.file-remove
-                      a href="#" ng-click="removeRemoteUrl(remoteFileUrl)" style='text-decoration: none; color: #da4f49;'
-                        i.fa.fa-times-circle
-              .clearfix.controls.remote-item
-                input.text.input.remote-item-url type='text' placeholder="Insert Url"
-                span.pull-right 
-                  button.btn.btn-default ng-click="addItemFromURL($event)" Add Files by URL 
-    
-    
-            .form-group ng-show='item.id > 0'
-              label.control-label
-                | Current Files
-                i.fa.fa-question-circle style="margin-left:8px" bs-popover="itemHelp['audioFiles']" data-placement="bottom" html="true" auto-close="true"
-              .controls ng-show="item.hasPendingDeletes()"
-                label.pull-left style='padding-top: 5px;'
-                  i You must click Save to confirm file deletion.
-              .controls ng-hide="item.audioFiles.length > 0"
-                label.pull-left style='padding-top: 5px;'
-                  i No current files.
-              .controls ng-show="item.audioFiles.length > 0"
-                table.table.file-table
-                  tr.file ng-repeat="audioFile in item.audioFiles" ng-hide="audioFile._delete"
-                    td.file-icon
-                      .item-thumb ng-class="iconForFile(audioFile)"
-                    td.file-name alt="{{audioFile.filename}}" {{audioFile.filename}}
-                    / td.file-size {{readableFileSize(audioFile.size)}}
-                    td.file-remove
-                      a.btn.btn-danger href="#" ng-click="removeAudioFile(audioFile)" Delete
-    
-            .form-group
-              label.control-label
-                | Collection
-                i.fa.fa-question-circle style="margin-left:8px" bs-popover="itemHelp['collection']" data-placement="bottom" html="true" auto-close="true"
-    
-              .controls
-    
-                select.input-xlarge#collection-id ng-hide="item.id > 0" ng-model='item.collectionId' ng-options="collection.id as collection.title group by collection.privateOrPublic() for collection in collections | validChangeCollections:item"
-    
-                select.input-xlarge#collection-id ng-show="item.id > 0" ng-model='item.adoptToCollection' ng-options="collection.id as collection.title group by collection.privateOrPublic() for collection in collections |  validChangeCollections:item"
-    
-              .controls ng-show="(!item.storage || (item.storage != 'InternetArchive')) && (selectedCollection && selectedCollection.storage == 'InternetArchive')"
-                .alert
+          | You are over your organization's monthly limit.
+        
+        form.item-form.form-horizontal name='newItemForm' 
+          div ng-show="showForm() && !currentuser.overMonthlyLimit"
+            div.form-group.remote-item ng-hide="item.id > 0 || !item.mayUploadFile()"  style="text-align:center;"
+              h3 Drag and drop a file anywhere on the site
+              div style="margin:-10px 0 10px 0;" or
+              span file-button="" style='margin-right: 4px;'
+                button.btn.btn-default.btn-lg.upload-file-button style="margin-bottom:5px;" Upload one file at a time
+              div style="margin:0 0 10px 0;" or
+              input.text.input.remote-item-url type='text' placeholder="Insert Url"
+              span style='margin: 4px;'
+                button.btn.btn-default.btn-lg ng-click="addItemFromURL($event)" style="margin-bottom:10px;" Add Files by URL
+      
+              .alert.alert-warning 
+                p
+                 | Periods not allowed in file names. (For example, episode1.wav, and 
+                 strong not 
+                 | episode.1.wav.) 
+      
+            section ng-show='(item.id > 0) || (item.mayUploadFile())'
+      
+              .alert.alert-danger ng-show="(item.files.length > 1) && showFilesAlert"
+                a ng-click="hideAlert()" style='text-decoration: none; color: #da4f49; float: right; margin-right: -20px;' 
+                  i.fa.fa-remove
+                p 
+                  | Multiple files are not supported.
+                p
                   strong
-                    |Are you sure you want to
-                    span ng-show='item.id'  move
-                    span ng-hide='item.id'  save
-                    |  {{item.title}} to the Internet Archive?
-                  div
-                    | '{{selectedCollection.title}}' is a
-                    strong()  {{selectedCollection.privateOrPublic()}}
-                    |  collection.
-                  div All audio stored at Internet Archive will be available to stream and download at archive.org and will be visible to all users of Pop Up Archive.
+                    | For separate playback of each file, delete extra files and upload one at a time.
+
+              .form-group ng-show="item.mayUploadFile()"
+                label.control-label
+                  | Upload File
+                  i.fa.fa-question-circle style="margin-left:8px" bs-popover="itemHelp['audioFiles']" data-placement="bottom" html="true" auto-close="true"
+                .controls ng-hide="item.files.length > 0"
+                  label.pull-left style='padding-top: 5px;'
+                    i No files to upload.
+                .controls ng-show="item.files.length > 0"
+                  table.table.file-table
+                    tr.file ng-repeat="audioFile in item.files"
+                      td.file-icon
+                        .item-thumb ng-class="iconForFile(audioFile)"
+                      td.file-name alt="{{audioFile.name}}" {{audioFile.name}}
+                      td.file-size() {{readableFileSize(audioFile.size)}}
+                      td.file-remove
+                        a href="#" ng-click="removeAudioFile(audioFile)" style='text-decoration: none; color: #da4f49;'
+                          i.fa.fa-times-circle
+                  
+                .clearfix.controls ng-hide="item.files.length > 0"
+                  span.pull-right file-button=""
+                    button.btn.btn-default.upload-file-button Add Files to Item
+      
+              .form-group ng-show="item.mayUploadFile()"
+                label.control-label
+                  | Add File
+                  i.fa.fa-question-circle style="margin-left:8px" bs-popover="itemHelp['audioFiles[][remoteFileUrl]']" data-placement="bottom" html="true" auto-close="true"
+                .controls ng-show="remoteFileUrls && remoteFileUrls.length > 0"
+                  table.table.file-table
+                    tr.file ng-repeat="remoteFileUrl in remoteFileUrls"
+                      td.file-icon
+                        .item-thumb ng-class="iconForFile(remoteFileUrl)"
+                      td.file-name() {{remoteFileUrl}}
+                      td.file-remove
+                        a href="#" ng-click="removeRemoteUrl(remoteFileUrl)" style='text-decoration: none; color: #da4f49;'
+                          i.fa.fa-times-circle
+                .clearfix.controls.remote-item
+                  input.text.input.remote-item-url type='text' placeholder="Insert Url"
+                  span.pull-right 
+                    button.btn.btn-default ng-click="addItemFromURL($event)" Add Files by URL 
+      
+      
+              .form-group ng-show='item.id > 0'
+                label.control-label
+                  | Current Files
+                  i.fa.fa-question-circle style="margin-left:8px" bs-popover="itemHelp['audioFiles']" data-placement="bottom" html="true" auto-close="true"
+                .controls ng-show="item.hasPendingDeletes()"
+                  label.pull-left style='padding-top: 5px;'
+                    i You must click Save to confirm file deletion.
+                .controls ng-hide="item.audioFiles.length > 0"
+                  label.pull-left style='padding-top: 5px;'
+                    i No current files.
+                .controls ng-show="item.audioFiles.length > 0"
+                  table.table.file-table
+                    tr.file ng-repeat="audioFile in item.audioFiles" ng-hide="audioFile._delete"
+                      td.file-icon
+                        .item-thumb ng-class="iconForFile(audioFile)"
+                      td.file-name alt="{{audioFile.filename}}" {{audioFile.filename}}
+                      / td.file-size {{readableFileSize(audioFile.size)}}
+                      td.file-remove
+                        a.btn.btn-danger href="#" ng-click="removeAudioFile(audioFile)" Delete
+      
+              .form-group
+                label.control-label
+                  | Collection
+                  i.fa.fa-question-circle style="margin-left:8px" bs-popover="itemHelp['collection']" data-placement="bottom" html="true" auto-close="true"
+      
+                .controls
+      
+                  select.input-xlarge#collection-id ng-hide="item.id > 0" ng-model='item.collectionId' ng-options="collection.id as collection.title group by collection.privateOrPublic() for collection in collections | validChangeCollections:item"
+      
+                  select.input-xlarge#collection-id ng-show="item.id > 0" ng-model='item.adoptToCollection' ng-options="collection.id as collection.title group by collection.privateOrPublic() for collection in collections |  validChangeCollections:item"
+      
+                .controls ng-show="(!item.storage || (item.storage != 'InternetArchive')) && (selectedCollection && selectedCollection.storage == 'InternetArchive')"
+                  .alert
+                    strong
+                      |Are you sure you want to
+                      span ng-show='item.id'  move
+                      span ng-hide='item.id'  save
+                      |  {{item.title}} to the Internet Archive?
+                    div
+                      | '{{selectedCollection.title}}' is a
+                      strong()  {{selectedCollection.privateOrPublic()}}
+                      |  collection.
+                    div All audio stored at Internet Archive will be available to stream and download at archive.org and will be visible to all users of Pop Up Archive.
+          
           section ng-show='((item.id > 0) || (item.files.length > 0) || (remoteFileUrls))'
             .form-group
               label.control-label
@@ -306,4 +309,4 @@ section.modal ng-controller="ItemFormCtrl"
     
       .modal-footer
         button.btn.btn-default type="button" ng-click="$hide()" Close
-        button.btn.btn-success ng-show='((item.id > 0) || (item.files.length > 0) || (remoteFileUrls)) && showForm()' ng-disabled='!item.id && !remoteFileUrls && (!item.collectionId || item.files.length <= 0) || newItemForm.$invalid' ng-click='submit(); $hide()' Save
+        button.btn.btn-success ng-disabled='!item.id && !remoteFileUrls && (!item.collectionId || item.files.length <= 0) || newItemForm.$invalid' ng-click='submit(); $hide()' Save
