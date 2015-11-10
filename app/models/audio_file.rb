@@ -939,6 +939,23 @@ class AudioFile < ActiveRecord::Base
   def duration_hms
     Api::BaseHelper::format_time(duration||0)
   end
+  
+  def retry_transcription_creation
+    return if (duration.to_i <= 0)
+    if !self.user.entity.plan.has_premium_transcripts?
+      extras = { 'original' => process_file_url, 'user_id' => user.try(:id) }
+      task = Tasks::TranscribeTask.new( identifier: 'ts_all', extras: extras )
+      self.tasks << task
+      task
+    elsif ENV['PREMIUM_TRANSCRIBER'] && ENV['PREMIUM_TRANSCRIBER'] == "voicebase"
+      extras = { 'original' => process_file_url, 'user_id' => user.try(:id), 'ondemand' => true }
+      task = Tasks::VoicebaseTranscribeTask.new(identifier: 'ts_paid', extras: extras)
+      self.tasks << task
+      task
+    else
+      return nil
+    end
+  end
 
   private
 
@@ -962,5 +979,6 @@ class AudioFile < ActiveRecord::Base
     set_metered
     set_current_status
   end
+
 
 end

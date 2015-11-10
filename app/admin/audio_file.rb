@@ -25,8 +25,24 @@ ActiveAdmin.register AudioFile do
     redirect_to :action => :show
   end
 
+  member_action :re_transcribe, method: :post do 
+    Rails.logger.warn("attempting transcription for #{params}")
+    af = AudioFile.find params[:id]
+    task = af.retry_transcription_creation 
+    if task 
+      flash[:notice] = "Hold Tight, Creating a transcript."
+    else
+      flash[:notice] = "This file can't be transcribed."
+    end 
+    redirect_to :action => :show
+  end
+
   action_item :edit, :only => :show, if: proc{ audio_file.stuck? } do
     link_to "Recover", superadmin_audio_file_path(audio_file)+'/nudge', method: :post
+  end 
+
+  action_item :edit, :only => :show, if: proc{ audio_file.needs_transcript? } do
+    link_to "Transcribe", superadmin_audio_file_path(audio_file)+'/re_transcribe', method: :post
   end 
 
   show do 
