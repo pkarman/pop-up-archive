@@ -61,30 +61,35 @@ namespace :monitor do
         
       if AudioFile.exists?(task.owner_id)
         file = AudioFile.find(task.owner_id) 
-        file = nil if file.is_uploaded?
+        upload_not_complete_files << file.id if !file.is_uploaded?
       end 
-      upload_not_complete_files << file.id if file != nil
     end
         
-    a = AudioFile.where(status_code: "G").pluck(:id)
-    combo = a + upload_not_complete_files
-    uniques = combo.inject([]) { |result,h| result << h unless result.include?(h); result } 
-    p uniques.count
-    uniques.each do |i|
-      if AudioFile.exists?(i) 
-        f = AudioFile.find(i)
-        if Item.exists?(f.item_id)
-          i = Item.find(f.item_id)
-          deletable = i if i.audio_files.count == 1
-          deletable = f if i.audio_files.count > 1
+    p upload_not_complete_files.count
+    upload_not_complete_files.each do |id|
+      if AudioFile.exists?(id) 
+        f = AudioFile.find(id)
+        if i=f.item
+          if ((i.audio_files.pluck(:id) - upload_not_complete_files).empty?) && (i.audio_files.count > 1)
+            deletable = i
+          elsif i.audio_files.count > 1
+            deletable = f
+          elsif i.audio_files.count == 1
+            deletable = i  
+          end
           time = DateTime.parse(args.since_date)  
           if f.created_at < time
             puts deletable.id
             puts deletable.class.name
-            deletable.destroy 
+            begin 
+              deletable.destroy 
+            rescue => e
+              puts e
+            end
           end
         end
       end
     end
   end  
-end
+end 
+
