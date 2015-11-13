@@ -17,6 +17,7 @@ ActiveAdmin.register Task do
     panel "Task Details" do
       attributes_table_for task do
         row("ID") { task.id }
+        row("PUA URL") {task.audio_file.item.url}
         row("Type") { task.type }
         row("Status") { task.status }
         row("Owner") { 

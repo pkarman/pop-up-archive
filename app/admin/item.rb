@@ -14,6 +14,7 @@ ActiveAdmin.register Item do
     panel "Item Details" do
       attributes_table_for item do
         row("ID") { item.id }
+        row("PUA URL") {item.url}
         row("Identifier") { item.identifier }
         row("Token") { item.token }
         row("Language") { item.language }

@@ -18,6 +18,7 @@ ActiveAdmin.register Transcript do
     panel "Transcript Details" do
       attributes_table_for transcript do
         row :id
+        row("PUA URL") {transcript.audio_file.item.url}
         row :transcriber
         row :audio_file
         row :identifier

@@ -13,6 +13,7 @@ ActiveAdmin.register Collection do
     panel "Collection Details" do
       attributes_table_for collection do
         row("ID") { collection.id }
+        row("PUA URL") {collection.url}
         row("Title") { collection.title }
         row("Creator") { collection.creator ? (link_to collection.creator.name, superadmin_user_path(collection.creator)) : nil }
         row("Billable To") { 

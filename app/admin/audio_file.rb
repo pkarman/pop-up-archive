@@ -49,6 +49,7 @@ ActiveAdmin.register AudioFile do
     panel "Audio File Details" do
       attributes_table_for audio_file do
         row("ID") { audio_file.id }
+        row("PUA URL") {audio_file.item.url}
         row("Filename") { audio_file.filename }
         row("URL") { audio_file.permanent_public_url({extension: 'mp3'}) }
         row("Collection") { link_to audio_file.collection.title, superadmin_collection_path(audio_file.collection) }
