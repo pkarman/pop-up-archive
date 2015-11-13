@@ -81,7 +81,7 @@ namespace :monitor do
           if f.created_at < time
             puts deletable.id
             puts deletable.class.name
-            # deletable.destroy 
+            deletable.destroy 
           end
         end
       end
