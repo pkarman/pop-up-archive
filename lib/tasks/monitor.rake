@@ -107,7 +107,8 @@ namespace :monitor do
         i = f.item
         time = DateTime.parse(args.since_date)  
         if f.created_at < time
-          puts f 
+          puts i.title
+          puts i.id 
           i.destroy 
         end
       end
