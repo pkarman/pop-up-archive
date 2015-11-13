@@ -73,8 +73,7 @@ namespace :monitor do
     uniques.each do |id|
       if AudioFile.exists?(id) 
         f = AudioFile.find(id)
-        if Item.exists?(f.item_id)
-          i = Item.find(f.item_id)
+        if i=f.item
           if ((i.audio_files.pluck(:id) - uniques).empty?) && (i.audio_files.count > 1)
             deletable = i
           elsif i.audio_files.count > 1
@@ -86,7 +85,11 @@ namespace :monitor do
           if f.created_at < time
             puts deletable.id
             puts deletable.class.name
-            deletable.destroy 
+            begin 
+              deletable.destroy 
+            rescue => e
+              puts e
+            end
           end
         end
       end
