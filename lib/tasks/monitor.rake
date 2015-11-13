@@ -104,6 +104,7 @@ namespace :monitor do
     uniques.each do |i|
       if AudioFile.exists?(i["audio_id"]) 
         f = AudioFile.find(i["audio_id"])
+        if Item.exists?(f.item)
         i = f.item
         time = DateTime.parse(args.since_date)  
         if f.created_at < time
@@ -111,15 +112,6 @@ namespace :monitor do
           puts i.id 
           i.destroy 
         end
-      end
-    end
-    file = "../Desktop/output_files_users_empty.csv"
-    p uniques.count
-    #Output list of audiofiles with failed upload tasks or with "G" status, with user emails. 
-    CSV.open(file, 'w') do |writer|
-      writer << ["Audio ID", "Owner", "Date Created", "URL"]
-      uniques.each do |i|
-          writer << [i["audio_id"], i["name"], i["date_created"], "www.popuparchive.com/collections/#{i['collection_id']}/items/#{i['item_id']}"] 
       end
     end
   end  
