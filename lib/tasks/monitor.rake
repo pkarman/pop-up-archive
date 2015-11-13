@@ -61,56 +61,28 @@ namespace :monitor do
         
       if AudioFile.exists?(task.owner_id)
         file = AudioFile.find(task.owner_id) 
-        file_tasks = file.tasks.select(:type, :status)
-        count = 0
-        file_tasks.each do |task_item|
-          if task_item.type == "Tasks::UploadTask"
-            count += 1
-            file = nil if count > 1 && task_item.status == "complete"
-          elsif task_item.type != "Tasks::UploadTask" && task_item.status == "complete"
-            file = nil
-          end
-        end   
+        file = nil if file.is_uploaded?
       end 
-      if User.exists?(task.extras["user_id"])
-        user_email = User.find(task.extras["user_id"]).email
-        user_combo = {}
-             
-        if file != nil 
-          user_combo["audio_id"] = file.id
-          user_combo["name"] = user_email
-          user_combo["date_created"] = file.created_at
-        end
-        upload_not_complete_files<<user_combo
-      end           
+      upload_not_complete_files << file.id if file != nil
     end
         
-    a = AudioFile.where(status_code: "G")
-    with_owner=[]
-    
-    a.each do |f|
-            
-      if User.exists?(f.user_id) 
-        owner = User.find(f.user_id).email
-        user_combo={}
-        user_combo["audio_id"] = f.id
-        user_combo["name"] = owner
-        user_combo["date_created"] = f.created_at
-        with_owner << user_combo
-      end
-    end
-    combo = with_owner + upload_not_complete_files
+    a = AudioFile.where(status_code: "G").pluck(:id)
+    combo = a + upload_not_complete_files
     uniques = combo.inject([]) { |result,h| result << h unless result.include?(h); result } 
+    p uniques.count
     uniques.each do |i|
-      if AudioFile.exists?(i["audio_id"]) 
-        f = AudioFile.find(i["audio_id"])
-        if Item.exists?(f.item)
-        i = f.item
-        time = DateTime.parse(args.since_date)  
-        if f.created_at < time
-          puts i.title
-          puts i.id 
-          i.destroy 
+      if AudioFile.exists?(i) 
+        f = AudioFile.find(i)
+        if Item.exists?(f.item_id)
+          i = Item.find(f.item_id)
+          deletable = i if i.audio_files.count == 1
+          deletable = f if i.audio_files.count > 1
+          time = DateTime.parse(args.since_date)  
+          if f.created_at < time
+            puts deletable.id
+            puts deletable.class.name
+            # deletable.destroy 
+          end
         end
       end
     end
