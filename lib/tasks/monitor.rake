@@ -65,12 +65,13 @@ namespace :monitor do
       end 
     end
         
-    a = AudioFile.where(status_code: "G").pluck(:id)
-    combo = a + upload_not_complete_files
+    # a = AudioFile.where(status_code: "G").pluck(:id)
+    # combo = a + upload_not_complete_files
     
-    uniques = combo.inject([]) { |result,h| result << h unless result.include?(h); result } 
-    p uniques.count
-    uniques.each do |id|
+    # uniques = combo.inject([]) { |result,h| result << h unless result.include?(h); result } 
+    # p uniques.count
+    p upload_not_complete_files.count
+    upload_not_complete_files.each do |id|
       if AudioFile.exists?(id) 
         f = AudioFile.find(id)
         if i=f.item
