@@ -61,9 +61,8 @@ namespace :monitor do
         
       if AudioFile.exists?(task.owner_id)
         file = AudioFile.find(task.owner_id) 
-        file = nil if file.is_uploaded?
+        upload_not_complete_files << file.id if !file.is_uploaded?
       end 
-      upload_not_complete_files << file.id if file != nil
     end
         
     a = AudioFile.where(status_code: "G").pluck(:id)
