@@ -1,23 +1,24 @@
 require 'csv'
+require 'time'
 
 namespace :monitor do
   desc "updating feeds"
-  task :feed, [:url, :collection_id] => [:environment] do |t, args|
+  task :feed, [:url, :collection_id, :oldest_entry] => [:environment] do |t, args|
     puts "Scheduling new feed check: #{args.url}"
-    process_feed = true
-    account_holder = Collection.find(args.collection_id).creator.entity.id
-    process_feed = false if User.over_limits.exists?(account_holder)
-        
-    if process_feed == true
-      if ENV['NOW']
-        FeedPopUp.update_from_feed(args.url, args.collection_id, ENV['DRY_RUN'], ENV['OLDEST_ENTRY'])
-      else
-        FeedUpdateWorker.perform_async(args.url, args.collection_id, ENV['OLDEST_ENTRY'])
-      end
-      puts "done."
-    else
+    account_holder = Collection.find(args.collection_id).creator.entity
+    
+    if account_holder.is_over_monthly_limit? 
       puts "Cannot complete for #{args}. Over usage limit warning!"
+      next
     end
+        
+    if ENV['NOW']
+      FeedPopUp.update_from_feed(args.url, args.collection_id, ENV['DRY_RUN'], (args.oldest_entry || ENV['OLDEST_ENTRY']))
+    else
+      FeedUpdateWorker.perform_async(args.url, args.collection_id, (args.oldest_entry || ENV['OLDEST_ENTRY']))
+    end
+    puts "done."
+
   end
 
   desc "check transcripts for gaps"
@@ -52,7 +53,8 @@ namespace :monitor do
   end
 
   desc "delete failed uploads from database"
-  task remove_failed_uploads: [:environment] do
+  task :remove_failed_uploads, [:since_date] => [:environment] do |t, args| 
+    p args
     all = Tasks::UploadTask.where("status!=?", "complete").select(:owner_id, :extras)
     upload_not_complete_files = []
     all.each do |task|
@@ -67,8 +69,8 @@ namespace :monitor do
             file = nil if count > 1 && task_item.status == "complete"
           elsif task_item.type != "Tasks::UploadTask" && task_item.status == "complete"
             file = nil
-          end 
-        end  
+          end
+        end   
       end 
       if User.exists?(task.extras["user_id"])
         user_email = User.find(task.extras["user_id"]).email
@@ -82,28 +84,44 @@ namespace :monitor do
         upload_not_complete_files<<user_combo
       end           
     end
-    destroy_now =[]
-    upload_not_complete_files.each do |i|
-      if AudioFile.exists?(i["audio_id"]) 
-        f = AudioFile.find(i["audio_id"])
-          #print deleted files to console
-          if f.created_at < Time.new(2013, 11, 15)
-            destroy_now << f
-            # AudioFile.destroy(f)
-          end
+        
+    a = AudioFile.where(status_code: "G")
+    with_owner=[]
+    
+    a.each do |f|
+            
+      if User.exists?(f.user_id) 
+        owner = User.find(f.user_id).email
+        user_combo={}
+        user_combo["audio_id"] = f.id
+        user_combo["name"] = owner
+        user_combo["date_created"] = f.created_at
+        with_owner << user_combo
       end
     end
-    p destroy_now.count
-    p destroy_now
-    file = "../Desktop/destroy_now.csv"
-    #This outputs list of audiofiles with failed upload tasks.
-    CSV.open(file, 'w') do |writer|
-      upload_not_complete_files.each do |i|
-          writer << [i["audio_id"], i["name"], i["date_created"], "www.popuparchive.com/collections/#{i['collection_id']}/items/#{i['item_id']}"] 
+    combo = with_owner + upload_not_complete_files
+    uniques = combo.inject([]) { |result,h| result << h unless result.include?(h); result } 
+    uniques.each do |i|
+      if AudioFile.exists?(i["audio_id"]) 
+        f = AudioFile.find(i["audio_id"])
+        time = DateTime.parse(args.since_date)  
+        if f.created_at < time
+          puts f 
+          AudioFile.destroy(f) 
         end
       end
-    # end
-  end
+    end
+    file = "../Desktop/output_files_users_empty.csv"
+    p uniques.count
+    #Output list of audiofiles with failed upload tasks or with "G" status, with user emails. 
+    CSV.open(file, 'w') do |writer|
+      writer << ["Audio ID", "Owner", "Date Created", "URL"]
+      uniques.each do |i|
+          writer << [i["audio_id"], i["name"], i["date_created"], "www.popuparchive.com/collections/#{i['collection_id']}/items/#{i['item_id']}"] 
+      end
+    end
+  end  
+
     
   desc "generate transcripts for audio files with no transcripts"
   task create_missing_transcripts: [:environment] do
@@ -118,23 +136,8 @@ namespace :monitor do
           file_hash["plays"] = "yes : 200" if file_found == 200
           file_hash["plays"] = "check, 403 forbidden" if file_found == 403
           file_hash["plays"] = "no : #{file_found}" if file_found == 404 || 401
-          # begin
-          #   file_found=HTTParty.head(f.original_file_url, follow_redirects: true, maintain_method_across_redirects: true, limit: 15)
-          #   case file_found.code
-          #     when 200
-          #       puts "Found #{f.id}"
-          #       file_hash["plays"] = "yes : 200"
-          #       # f.process_file
-          #     when 403
-          #       puts "Forbidden"
-          #       file_hash["plays"] = "check, 403 forbidden"
-          #     when 404 || 401
-          #       puts "Not found #{response.code}: #{f.id} #{f.original_file_url}"
-          #       file_hash["plays"] = "no : #{file_found}"
-          #     end
-          # rescue => e
-          #   p "unknown response"
-          # end
+          # f.process_file if file_found == 200
+          
           file_hash["audio_id"] = f.id 
           file_hash["created_at"] = f .created_at
           
