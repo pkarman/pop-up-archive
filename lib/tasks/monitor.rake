@@ -75,7 +75,7 @@ namespace :monitor do
       if AudioFile.exists?(id) 
         f = AudioFile.find(id)
         if i=f.item
-          if ((i.audio_files.pluck(:id) - uniques).empty?) && (i.audio_files.count > 1)
+          if ((i.audio_files.pluck(:id) - upload_not_complete_files).empty?) && (i.audio_files.count > 1)
             deletable = i
           elsif i.audio_files.count > 1
             deletable = f
