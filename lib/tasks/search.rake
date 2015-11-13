@@ -10,7 +10,7 @@ require 'pp'
 #
 # to stage a tmp index while the production index continues to serve live requests:
 #
-# % heroku run --size=PX rake search:stage search:commit NEWRELIC_ENABLE=false NPROCS=6 BATCH=100 -a pop-up-archive
+# % heroku run --size=performance-m rake search:stage search:commit NEWRELIC_ENABLE=false NPROCS=6 BATCH=100 -a pop-up-archive
 #
 
 namespace :search do
