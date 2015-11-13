@@ -104,10 +104,11 @@ namespace :monitor do
     uniques.each do |i|
       if AudioFile.exists?(i["audio_id"]) 
         f = AudioFile.find(i["audio_id"])
+        i = f.item
         time = DateTime.parse(args.since_date)  
         if f.created_at < time
           puts f 
-          AudioFile.destroy(f) 
+          i.destroy 
         end
       end
     end
