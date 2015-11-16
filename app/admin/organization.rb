@@ -49,7 +49,7 @@ ActiveAdmin.register Organization do
         tbl.column :use
         tbl.column('Wholesale') {|mu| div :class => "cost" do number_to_currency(mu.cost); end }
         tbl.column('Retail') {|mu| div :class => "cost" do number_to_currency(mu.retail_cost); end }
-        tbl.column('Time') {|mu| Api::BaseHelper::time_definition(mu.value||0) }
+        tbl.column('Time') {|mu| mu.value_as_hms }
       end
     end
     panel "Users" do
