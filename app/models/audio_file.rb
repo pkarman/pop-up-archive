@@ -958,7 +958,7 @@ class AudioFile < ActiveRecord::Base
   end
 
   def reprocess_as_basic_transcript(user, identifier='ts_all', options={})
-    extras = { 'original' => process_file_url, 'user_id' => user.try(:id), 'start_only' => true }.merge(options)
+    extras = { 'original' => process_file_url, 'user_id' => user.try(:id), 'force_basic' => true }.merge(options)
     self.tasks << Tasks::TranscribeTask.new( identifier: identifier, extras: extras )
   end
 

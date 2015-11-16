@@ -197,7 +197,7 @@ class Tasks::TranscribeTask < Task
       cost_per_min: transcriber.cost_per_min,
       retail_cost_per_min: transcriber.retail_cost_per_min,
       cost_type: Transcript::WHOLESALE,
-      is_billable: self.start_only? ? false : true,
+      is_billable: self.force_basic? ? false : true,
       subscription_plan_id: audio_file.user.billable_subscription_plan_id,
     )
     sum = 0.0
@@ -245,6 +245,10 @@ class Tasks::TranscribeTask < Task
 
   def start_only?
     !!extras['start_only']
+  end
+
+  def force_basic?
+    extras['force_basic']
   end
 
   def destination
