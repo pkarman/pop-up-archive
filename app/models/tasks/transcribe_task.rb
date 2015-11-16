@@ -248,7 +248,7 @@ class Tasks::TranscribeTask < Task
   end
 
   def force_basic?
-    extras['force_basic']
+    !!extras['force_basic']
   end
 
   def destination
