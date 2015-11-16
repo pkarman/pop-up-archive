@@ -65,11 +65,6 @@ namespace :monitor do
       end 
     end
         
-    # a = AudioFile.where(status_code: "G").pluck(:id)
-    # combo = a + upload_not_complete_files
-    
-    # uniques = combo.inject([]) { |result,h| result << h unless result.include?(h); result } 
-    # p uniques.count
     p upload_not_complete_files.count
     upload_not_complete_files.each do |id|
       if AudioFile.exists?(id) 
@@ -97,94 +92,18 @@ namespace :monitor do
     end
   end  
 
-    
-  # desc "generate transcripts for audio files with no transcripts"
-  # task create_missing_transcripts: [:environment] do
-  #   all_files = AudioFile.where("duration>?", 5).select(:id, :created_at, :user_id, :item_id, :transcript, :original_file_url)
-  #   collect_files = []
-  #   all_files.each do |f|
-  #     if f.needs_transcript?
-  #       #check IA for those not uploaded
-  #       if (f.has_attribute?("original_file_url")) && (f.original_file_url != nil)
-  #         file_hash = {}
-  #         file_found=FileCleanupWorker.find_file(f.id)
-  #         file_hash["plays"] = "yes : 200" if file_found == 200
-  #         file_hash["plays"] = "check, 403 forbidden" if file_found == 403
-  #         file_hash["plays"] = "no : #{file_found}" if file_found == 404 || 401
-  #         # f.process_file if file_found == 200
-          
-  #         file_hash["audio_id"] = f.id 
-  #         file_hash["created_at"] = f .created_at
-          
-  #         if Item.exists?(f.item_id)
-  #           item = Item.find(f.item_id)
-  #           if Collection.exists?(item.collection_id)
-  #             col_id = item.collection_id
-  #             file_hash["url"] =  "www.popuparchive.com/collections/#{col_id}/items/#{item.id}"
-  #           end
-  #         end
-        
-  #         if User.exists?(f.user_id)
-  #           u = User.find(f.user_id)
-  #           file_hash["file_owner"] = u.entity.name
-  #           if u.plan.has_premium_transcripts?
-  #             file_hash["has_premium"] = "Premium"
-  #           else  
-  #             file_hash["has_premium"] = "Basic"
-  #           end
-  #         else
-  #           file_hash["file_owner"] = nil
-  #           file_hash["has_premium"] = "none"
-  #         end
-  #         collect_files << file_hash
-        
-  #       #for uploaded files with no transcripts
-  #       else 
-  #         uploaded = false
-  #         if f.is_uploaded?
-  #           uploaded = true
-  #         end
-  #         if uploaded == true
-  #           file_hash = {} 
-  #           file_hash["audio_id"] = f.id 
-  #           file_hash["created_at"] = f.created_at
-  #           file_hash["plays"] = "manual check"
-  #           if Item.exists?(f.item_id)
-  #             item = Item.find(f.item_id)
-  #             if Collection.exists?(item.collection_id)
-  #               col_id = item.collection_id
-  #               file_hash["url"] =  "www.popuparchive.com/collections/#{col_id}/items/#{item.id}"
-  #             end
-  #           end
-  #           if User.exists?(f.user_id)
-  #             u = User.find(f.user_id)
-  #             file_hash["file_owner"] = u.entity.name
-  #             if u.plan.has_premium_transcripts?
-  #               file_hash["has_premium"] = "Premium"
-  #             else 
-  #               file_hash["has_premium"] = "none"
-  #             end
-  #           else 
-  #             file_hash["file_owner"] = nil
-  #             file_hash["has_premium"] = "none"
-  #           end
-  #           #f.process_file
-  #           collect_files << file_hash
-  #         end
-  #       end
-  #     end          
-  #   end
-  #   p collect_files
-  #   p collect_files.count
-    
-  #   file = "../Desktop/transcripts.csv"
-
-  #   CSV.open(file, 'w') do |writer|
-  #     writer << ["AudioFile ID", "Date Created", "Owner", "Transcript Type", "url", "found/plays"]
-  #     collect_files.each do |i|
-  #         writer << [i["audio_id"], i["created_at"], i["file_owner"], i["has_premium"], i["url"], i["plays"]] 
-  #     end
-  #   end
-  # end
+   #[34159, 34183, 34581] 
+  desc "generate basic transcripts for audio files with no transcripts"
+  task :create_missing_transcripts, [:ids] => [:environment] do |t, args|
+    ids = args.ids.split(' ').map(&:to_i)
+    p ids
+    ids.each do |id|
+      file = AudioFile.find(id)
+      user = User.find(file.user_id)
+      if user.id == file.user_id
+        file.reprocess_as_basic_transcript(user, 'ts_all')
+      end  
+    end
+  end          
 end 
 

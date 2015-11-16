@@ -957,6 +957,11 @@ class AudioFile < ActiveRecord::Base
     end
   end
 
+  def reprocess_as_basic_transcript(user, identifier='ts_all', options={})
+    extras = { 'original' => process_file_url, 'user_id' => user.try(:id) }.merge(options)
+    self.tasks << Tasks::TranscribeTask.new( identifier: identifier, extras: extras )
+  end
+
   private
 
   def set_metered
