@@ -3,9 +3,10 @@ require 'time'
 
 namespace :monitor do
   desc "updating feeds"
-  task :feed, [:url, :collection_id, :oldest_entry] => [:environment] do |t, args|
+  task :feeder, [:url, :collection_id, :oldest_entry] => [:environment] do |t, args|
     puts "Scheduling new feed check: #{args.url}"
-    account_holder = Collection.find(args.collection_id).creator.entity
+    account_holder = Collection.find(args.collection_id).billable_to
+    p account_holder
     
     if account_holder.is_over_monthly_limit? 
       puts "Cannot complete for #{args}. Over usage limit warning!"
@@ -14,8 +15,10 @@ namespace :monitor do
         
     if ENV['NOW']
       FeedPopUp.update_from_feed(args.url, args.collection_id, ENV['DRY_RUN'], (args.oldest_entry || ENV['OLDEST_ENTRY']))
+      p "process feedpopup"
     else
       FeedUpdateWorker.perform_async(args.url, args.collection_id, (args.oldest_entry || ENV['OLDEST_ENTRY']))
+      p "process feedupdate"
     end
     puts "done."
 
@@ -53,7 +56,7 @@ namespace :monitor do
   end
 
   desc "delete failed uploads from database"
-  task :remove_failed_uploads, [:since_date] => [:environment] do |t, args| 
+  task :remove_failed_uploads, [:date] => [:environment] do |t, args| 
     p args
     all = Tasks::UploadTask.where("status!=?", "complete").select(:owner_id, :extras)
     upload_not_complete_files = []
@@ -77,7 +80,7 @@ namespace :monitor do
           elsif i.audio_files.count == 1
             deletable = i  
           end
-          time = DateTime.parse(args.since_date)  
+          time = DateTime.parse(args.date)  
           if f.created_at < time
             puts deletable.id
             puts deletable.class.name
@@ -104,6 +107,33 @@ namespace :monitor do
         file.reprocess_as_basic_transcript(user, 'ts_all')
       end  
     end
-  end          
+  end 
+
+  desc "generate copy to s3 tasks for AudioFiles with failed tasks" 
+  task :run_copy_to_s3_tasks, [:date] => [:environment] do |t, args|
+    time = DateTime.parse(args.date) 
+    files = AudioFile.where("created_at < ?", time)
+    count =0
+    count2 = 0
+    files.each do |file|
+      if (file != nil) && (i=file.item || c=file.collection) && (file.url('mp3') != nil && (!file.url('mp3').include? "cloudfront")) && (file.copy_media? == true)
+          if (file.tasks.any?{ |t| t.type == "Tasks::CopyToS3Task" && t.status == "complete"}) && (file.url('mp3').include? "/archive.org/")
+            # proper_storage = file.tasks.where(type: "Tasks::CopyToS3Task").last.storage
+            # file.storage_configuration = proper_storage 
+            # file.save
+            count += 1
+          else
+            #check below method => return unless storage.automatic_transcode?
+            #does it need to go to IA first?
+            # file.start_copy_to_s3_job
+            count2 += 1
+          end        
+      # else
+      end
+      
+    end
+    p count_ia
+    p count_other
+  end        
 end 
 
