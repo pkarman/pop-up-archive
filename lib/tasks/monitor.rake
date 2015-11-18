@@ -5,7 +5,7 @@ namespace :monitor do
   desc "updating feeds"
   task :feed, [:url, :collection_id, :oldest_entry] => [:environment] do |t, args|
     puts "Scheduling new feed check: #{args.url}"
-    account_holder = Collection.find(args.collection_id).creator.entity
+    account_holder = Collection.find(args.collection_id).billable_to
     
     if account_holder.is_over_monthly_limit? 
       puts "Cannot complete for #{args}. Over usage limit warning!"
@@ -14,8 +14,10 @@ namespace :monitor do
         
     if ENV['NOW']
       FeedPopUp.update_from_feed(args.url, args.collection_id, ENV['DRY_RUN'], (args.oldest_entry || ENV['OLDEST_ENTRY']))
+      p "process feedpopup"
     else
       FeedUpdateWorker.perform_async(args.url, args.collection_id, (args.oldest_entry || ENV['OLDEST_ENTRY']))
+      p "process feedupdate"
     end
     puts "done."
 
@@ -53,7 +55,7 @@ namespace :monitor do
   end
 
   desc "delete failed uploads from database"
-  task :remove_failed_uploads, [:since_date] => [:environment] do |t, args| 
+  task :remove_failed_uploads, [:date] => [:environment] do |t, args| 
     p args
     all = Tasks::UploadTask.where("status!=?", "complete").select(:owner_id, :extras)
     upload_not_complete_files = []
@@ -77,7 +79,7 @@ namespace :monitor do
           elsif i.audio_files.count == 1
             deletable = i  
           end
-          time = DateTime.parse(args.since_date)  
+          time = DateTime.parse(args.date)  
           if f.created_at < time
             puts deletable.id
             puts deletable.class.name
@@ -91,5 +93,21 @@ namespace :monitor do
       end
     end
   end  
+
+   #[34159, 34183, 34581] 
+  desc "generate basic transcripts for audio files with no transcripts"
+  task :create_missing_transcripts, [:ids] => [:environment] do |t, args|
+    ids = args.ids.split(' ').map(&:to_i)
+    p ids
+    ids.each do |id|
+      file = AudioFile.find(id)
+      user = User.find(file.user_id)
+      if user.id == file.user_id
+        file.reprocess_as_basic_transcript(user, 'ts_all')
+      end  
+    end
+  end 
+
+  
 end 
 
