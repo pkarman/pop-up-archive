@@ -3,10 +3,9 @@ require 'time'
 
 namespace :monitor do
   desc "updating feeds"
-  task :feeder, [:url, :collection_id, :oldest_entry] => [:environment] do |t, args|
+  task :feed, [:url, :collection_id, :oldest_entry] => [:environment] do |t, args|
     puts "Scheduling new feed check: #{args.url}"
     account_holder = Collection.find(args.collection_id).billable_to
-    p account_holder
     
     if account_holder.is_over_monthly_limit? 
       puts "Cannot complete for #{args}. Over usage limit warning!"
