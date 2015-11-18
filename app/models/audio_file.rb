@@ -49,7 +49,7 @@ class AudioFile < ActiveRecord::Base
   TRANSCRIBE_INPROCESS        = 'Transcribing'
   STUCK                       = 'Processing'
   CANCELLED                   = 'Cancelled'
-
+  BLANK_EMPTY_FILE            = 'Silent or Blank File'  
   # status enum
   STATUS_CODES = {
     A: 'UNKNOWN_STATE',
@@ -64,6 +64,7 @@ class AudioFile < ActiveRecord::Base
     J: 'TRANSCRIBE_INPROCESS',
     K: 'STUCK',
     X: 'CANCELLED',
+    Z: 'BLANK_EMPTY_FILE'
   }
 
   # returns object to which this audio_file should be accounted.
@@ -882,7 +883,9 @@ class AudioFile < ActiveRecord::Base
       status = TRANSCRIPT_PREMIUM_COMPLETE
     end
     #Rails.logger.warn("6 elapsed: #{Time.now - st_time}")
-
+    if self.is_blank_file?
+      status = BLANK_EMPTY_FILE
+    end
     # TODO do we care about communicating the analyze status?
 
     status
@@ -910,6 +913,10 @@ class AudioFile < ActiveRecord::Base
     else
       return false
     end
+  end
+
+  def is_blank_file?
+    self.tasks.any?{|t| t.type == 'Tasks::VoicebaseTranscribeTask' && t.extras['error'] == "Voicebase job empty"}
   end
 
   def best_transcript(language='en-US')

@@ -279,6 +279,24 @@ describe AudioFile do
       task.extras['ondemand'].should == "true"
     end
 
+    it "should set audio file status to BLANK_EMPTY_FILE when silent file is uploaded" do
+      new_user = FactoryGirl.create :user
+      @audio_file.original_file_url = "http://example.com/file.mp3"
+      new_user.update_card!(card_token)
+      plan = SubscriptionPlanCached.create name: 'Test Plan', amount: 10000, hours: 200, plan_id: '10_small_business_yr'
+      new_user.subscribe!(plan)
+      task1 = Tasks::UploadTask.new(extras: {'num_chunks' => 2, 'chunks_uploaded' => "1\n", 'key' => 'this/is/a/key.mp3'}, owner: @audio_file)
+      task1.save!
+      @audio_file.user = new_user
+      @audio_file.transcoded_at = '10/10/2014'
+      @audio_file.duration = 100
+      extras = { 'original' => @audio_file.original_file_url, 'user_id' => new_user.id }
+      task2 = Tasks::VoicebaseTranscribeTask.create!(owner: @audio_file, identifier: 'test', extras: extras)
+      task2.extras['error'] = ("Voicebase job empty")
+      task2.save!
+      @audio_file.current_status.should == "Silent or Blank File"
+    end
+
   end
 
   describe "#update_from_fixer" do
