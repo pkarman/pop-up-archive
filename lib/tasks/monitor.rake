@@ -107,7 +107,34 @@ namespace :monitor do
       end  
     end
   end 
+  
+  desc "generate copy to s3 tasks for AudioFiles with failed tasks" 
+  task :run_copy_to_s3_tasks, [:date] => [:environment] do |t, args|
+    time = DateTime.parse(args.date) 
+    files = AudioFile.where("created_at < ?", time)
+    ai=[]
+    neither=[]
+    ai_not_copied = []
+    leftovers = []
+    files.each do |file|
+      if (file != nil) && (i=file.item || c=file.collection) && (file.url('mp3') != nil) 
+        if (file.url('mp3').exclude? 'cloudfront') && (file.copy_media? == true)
+          if (file.tasks.any?{ |t| t.type == "Tasks::CopyToS3Task" && t.status == "complete"}) && (file.url('mp3').include? "/archive.org/")
+            proper_storage = file.tasks.where(type: "Tasks::CopyToS3Task").last.storage
+            file.storage_configuration = proper_storage 
+            file.save
+          elsif (file.url('mp3').exclude? "/archive.org/") && (file.storage_configuration != nil) && (file.storage_configuration.provider != "AWS") 
+            file.process_file
+            file.start_copy_to_s3_job
+          elsif file.url('mp3').include? "/archive.org/"
+            file.start_copy_to_s3_job
+          end 
+        end       
+      end
+      
+    end
 
+  end        
   
 end 
 
