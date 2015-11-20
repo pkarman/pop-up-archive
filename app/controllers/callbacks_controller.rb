@@ -93,7 +93,6 @@ class CallbacksController < ApplicationController
   def stripe_webhook
     # the body is the JSON payload, decoded for us as params
     stripe_event = params.except(:action, :controller)
-
     # pull out the customer id
     cust_id = stripe_event[:data][:object][:customer]
     #Rails.logger.warn("stripe callback for customer #{cust_id}")
@@ -108,7 +107,6 @@ class CallbacksController < ApplicationController
       # parse stripe_event[:type] for more fine-grained control of actions we take.
 
       if stripe_event[:type] == 'customer.subscription.updated'
-
         # add event as comment so it is visible in superadmin
         comment = ActiveAdminComment.new(
           namespace: 'stripe',
@@ -125,9 +123,23 @@ class CallbacksController < ApplicationController
       user.subscription_plan_id = nil
       user.save!
       
+
+      if stripe_event[:type] == 'charge.failed'
+        p "Failure"
+        subject = "Stripe Card Error Alert"
+        body = "CHARGE DECLINED. The following user's card has generated a Stripe error: #{user}. Please follow up."
+        MyMailer.mailto(subject, body, 'edison@popuparchive.org')
+      end
+
+      if stripe_event[:type] == 'card_error'
+        p "card failed!!"
+        subject = "Stripe Card Error Alert"
+        body = "CARD ERROR. The following user's card has generated a Stripe error: #{user}. Please follow up."
+        MyMailer.mailto(subject, body, 'edison@popuparchive.org')
+      end
+
       # log it
       MixpanelWorker.perform_async(stripe_event[:type], { customer_id: user.customer_id, event_id: stripe_event[:id] })
-
     else
       Rails.logger.warn("Got stripe callback for non-existent user.customer_id #{cust_id}")
 
