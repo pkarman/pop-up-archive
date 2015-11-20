@@ -125,17 +125,17 @@ class CallbacksController < ApplicationController
       
 
       if stripe_event[:type] == 'charge.failed'
-        p "Failure"
+        p "Failure. Stripe charge failed."
         subject = "Stripe Card Error Alert"
         body = "CHARGE DECLINED. The following user's card has generated a Stripe error: #{user}. Please follow up."
-        MyMailer.mailto(subject, body, 'edison@popuparchive.org')
+        MyMailer.mailto(subject, body, 'anders@popuparchive.org')
       end
 
       if stripe_event[:type] == 'card_error'
-        p "card failed!!"
+        p "Card failed."
         subject = "Stripe Card Error Alert"
         body = "CARD ERROR. The following user's card has generated a Stripe error: #{user}. Please follow up."
-        MyMailer.mailto(subject, body, 'edison@popuparchive.org')
+        MyMailer.mailto(subject, body, 'anders@popuparchive.org')
       end
 
       # log it
