@@ -41,7 +41,7 @@ ActiveAdmin.register AudioFile do
     link_to "Recover", superadmin_audio_file_path(audio_file)+'/nudge', method: :post
   end 
 
-  action_item :edit, :only => :show, if: proc{ audio_file.needs_transcript? } do
+  action_item :edit, :only => :show, if: proc{ audio_file } do
     link_to "Transcribe", superadmin_audio_file_path(audio_file)+'/re_transcribe', method: :post
   end 
 
