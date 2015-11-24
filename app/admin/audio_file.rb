@@ -25,14 +25,31 @@ ActiveAdmin.register AudioFile do
     redirect_to :action => :show
   end
 
+  member_action :re_transcribe, method: :post do 
+    Rails.logger.warn("attempting transcription for #{params}")
+    af = AudioFile.find params[:id]
+    task = af.retry_transcription_creation 
+    if task 
+      flash[:notice] = "Hold Tight, Creating a transcript."
+    else
+      flash[:notice] = "This file can't be transcribed."
+    end 
+    redirect_to :action => :show
+  end
+
   action_item :edit, :only => :show, if: proc{ audio_file.stuck? } do
     link_to "Recover", superadmin_audio_file_path(audio_file)+'/nudge', method: :post
+  end 
+
+  action_item :edit, :only => :show, if: proc{ audio_file.needs_transcript? } do
+    link_to "Transcribe", superadmin_audio_file_path(audio_file)+'/re_transcribe', method: :post
   end 
 
   show do 
     panel "Audio File Details" do
       attributes_table_for audio_file do
         row("ID") { audio_file.id }
+        row("PUA URL") {audio_file.item.url}
         row("Filename") { audio_file.filename }
         row("URL") { audio_file.permanent_public_url({extension: 'mp3'}) }
         row("Collection") { link_to audio_file.collection.title, superadmin_collection_path(audio_file.collection) }

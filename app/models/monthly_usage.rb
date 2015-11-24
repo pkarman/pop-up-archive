@@ -27,7 +27,7 @@ class MonthlyUsage < ActiveRecord::Base
   end
 
   def value_as_hms
-    Time.at(self.value).getgm.strftime('%H:%M:%S')
+    Api::BaseHelper::time_definition(self.value || 0)
   end
 
 end

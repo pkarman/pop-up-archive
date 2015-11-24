@@ -430,7 +430,11 @@ angular.module('Directory.items.controllers', ['Directory.loader', 'Directory.us
       element.next('.alert-danger').remove();
       var numValid = 0;
       angular.forEach(newFiles, function(file) {
-        if (!$scope.looksLikeValidFileName(file.name)) {
+        if ((file.name).match(/\.zip/i)) {
+          element.closest('.form-group').addClass('has-error');
+          element.after('<div class="alert alert-danger">Not a valid audio file: '+file.name+'</div>');
+        }
+        else if (!$scope.looksLikeValidFileName(file.name)) {
           element.closest('.form-group').addClass('has-error');
           element.after('<div class="alert alert-danger">Not a valid audio file: '+file.name+'</div>');
         }
