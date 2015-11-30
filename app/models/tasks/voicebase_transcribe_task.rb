@@ -215,7 +215,8 @@ class Tasks::VoicebaseTranscribeTask < Task
 
     if vb_job.media.transcripts && vb_job.media.transcripts.latest.words.count == 0
       self.extras['error'] = "Voicebase job empty"
-      cancel!
+      self.status = 'failed'
+      self.save!
       return
     end
 
