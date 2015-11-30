@@ -350,6 +350,7 @@ class AudioFile < ActiveRecord::Base
 
   def premium_transcribe_audio(user=self.user)
     # only start this if transcode is complete
+    return if self.collection.extra["skip_transcript"] = true
     return unless transcoded_at or self.is_mp3? or is_mp3_transcode_complete?
     return unless ((user && user.plan.has_premium_transcripts?) || item.is_premium?)
 
@@ -367,6 +368,7 @@ class AudioFile < ActiveRecord::Base
 
   def transcribe_audio(user=self.user)
     #for IA only start if transcode complete
+    return if self.collection.extra["skip_transcript"] = true
     return if !self.transcoded? and storage.at_internet_archive?
     # only start if transcode is complete
     return unless self.transcoded? or self.is_mp3? or self.is_mp3_transcode_complete?

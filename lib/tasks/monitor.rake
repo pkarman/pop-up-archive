@@ -94,7 +94,6 @@ namespace :monitor do
     end
   end  
 
-   #[34159, 34183, 34581] 
   desc "generate basic transcripts for audio files with no transcripts"
   task :create_missing_transcripts, [:ids] => [:environment] do |t, args|
     ids = args.ids.split(' ').map(&:to_i)
@@ -112,10 +111,6 @@ namespace :monitor do
   task :run_copy_to_s3_tasks, [:date] => [:environment] do |t, args|
     time = DateTime.parse(args.date) 
     files = AudioFile.where("created_at < ?", time)
-    ai=[]
-    neither=[]
-    ai_not_copied = []
-    leftovers = []
     files.each do |file|
       if (file != nil) && (i=file.item || c=file.collection) && (file.url('mp3') != nil) 
         if (file.url('mp3').exclude? 'cloudfront') && (file.copy_media? == true)

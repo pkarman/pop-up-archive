@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150819163026) do
+ActiveRecord::Schema.define(version: 20151130203921) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -97,6 +97,7 @@ ActiveRecord::Schema.define(version: 20150819163026) do
     t.datetime "deleted_at"
     t.integer  "creator_id"
     t.string   "token",                    limit: 255
+    t.hstore   "extra",                                default: {}
   end
 
   create_table "contributions", force: :cascade do |t|
