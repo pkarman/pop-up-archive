@@ -124,7 +124,7 @@ class CallbacksController < ApplicationController
       user.save!
       
 
-      if stripe_event[:type] == 'charge.failed'
+      if stripe_event[:type] == 'charge.failed' || stripe_event[:type] == 'invoice.payment_failed'
         p "Failure. Stripe charge failed."
         subject = "Stripe Card Error Alert"
         body = "CHARGE DECLINED. The following user's card has generated a Stripe error: #{user}. Please follow up."
