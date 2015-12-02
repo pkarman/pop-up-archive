@@ -60,7 +60,7 @@ class FeedPopUp
  
     item.collection       = collection
     item.description      = sanitize_text(entry.summary)
-    item.title            = entry.title
+    item.title            = entry.title || entry.enclosure_url 
     item.identifier       = id(entry)
     item.digital_location = entry.url
     item.date_broadcast   = entry.published
