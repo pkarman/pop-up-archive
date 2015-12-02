@@ -7,10 +7,10 @@ class MixpanelWorker
   sidekiq_options retry: 10, backtrace: true
 
   # :nocov:
-  def perform(event_name, event_args)
+  def perform(distinct_id, event_name, event_args)
     begin
       tracker = Mixpanel::Tracker.new(ENV['MIXPANEL_PROJECT'])
-      tracker.track(rand(9999), event_name, event_args)
+      tracker.track(distinct_id, event_name, event_args)
     rescue => e
       raise e
     end

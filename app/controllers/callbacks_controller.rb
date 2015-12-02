@@ -139,7 +139,7 @@ class CallbacksController < ApplicationController
       end
 
       # log it
-      MixpanelWorker.perform_async(stripe_event[:type], { customer_id: user.customer_id, event_id: stripe_event[:id] })
+      MixpanelWorker.perform_async(user.email, stripe_event[:type], { customer_id: user.customer_id, event_id: stripe_event[:id] })
     else
       Rails.logger.warn("Got stripe callback for non-existent user.customer_id #{cust_id}")
 
