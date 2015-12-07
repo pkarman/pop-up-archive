@@ -922,7 +922,7 @@ class AudioFile < ActiveRecord::Base
   end
 
   def best_transcript(language='en-US')
-    if self.transcripts.count > 0
+    if self.transcripts.any? { |t| t.updated_at > t.created_at}
       self.transcripts.each do |t|
         if t.updated_at > t.created_at
           return t
