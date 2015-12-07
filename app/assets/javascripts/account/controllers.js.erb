@@ -27,6 +27,30 @@ angular.module('Directory.account.controllers', ['stripe', 'Directory.account.mo
     $scope.showCreditModal();
   }
 
+  $scope.clickedUpgrade = function () {
+    mixpanel.track(
+      "Clicked Upgrade",{
+        "Source": "Need more room"
+      }
+    );
+  }  
+
+  $scope.clickedFindOut = function () {
+    mixpanel.track(
+      "Clicked Upgrade",{
+        "Source": "Find out more"
+      }
+    );
+  }    
+
+  $scope.changedPlan = function () {
+    mixpanel.track(
+      "Clicked Upgrade",{
+        "Source": "Change plan"
+      }
+    );
+  } 
+
   var creditCardModal = $modal({template: '/assets/account/credit_card.html', persist: true, show: false, backdrop: 'static', scope: $scope});
 
   $scope.showCreditModal = function () {

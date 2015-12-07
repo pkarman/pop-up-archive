@@ -1,6 +1,6 @@
 .row
   .page-nav.pull-right
-    a.btn.btn-default href="/account/plan" 
+    a.btn.btn-default ng-click="changedPlan()" href="/account/plan" 
       i.fa.fa-wrench
       |  Change Plan
   h3
@@ -28,10 +28,10 @@
 .row ng-hide="me.plan.amount"
   .well
     h6.pull-right
-      a href="/account/plan" Find out more &raquo;
+      a ng-click="clickedFindOut()" href="/account/plan" Find out more &raquo;
     h4
       | Need more room?&nbsp;
-      a href="/account/plan" Upgrade to a paid plan!
+      a ng-click="clickedUpgrade()" href="/account/plan" Upgrade to a paid plan!
 .row
   .well.usage
     h4 My Account
