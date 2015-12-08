@@ -234,7 +234,8 @@ class User < ActiveRecord::Base
     subscr.save
 
     # log it
-    MixpanelWorker.perform_async(email, 'subscription change', { customer: customer_id, orig_plan: orig_plan.name, new_plan: subscr.plan.name })
+    MixpanelWorker.perform_async(self.email, 'subscription change', { customer: customer_id, orig_plan: orig_plan.name, new_plan: subscr.plan.name })
+    MixpanelPeopleWorker.perform_async(self.email, {'$plan' => subscr.plan.id})
 
     # must do this manually after subscription.save has successfully completed
     # so that our local caches are in sync.
