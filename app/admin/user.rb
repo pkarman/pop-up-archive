@@ -53,7 +53,7 @@ ActiveAdmin.register User do
     end
 
     panel "Monthly Usage" do
-      table_for user.monthly_usages.order('yearmonth desc') do|tbl|
+      table_for user.monthly_usages.where(use: ["basic transcripts", "premium transcripts"]).order('yearmonth desc') do |tbl|
         tbl.column('Month') {|mu| link_to mu.yearmonth, superadmin_monthly_usage_path(mu) }
         tbl.column :use
         tbl.column('Wholesale') {|mu| div :class => "cost" do number_to_currency(mu.cost); end }
