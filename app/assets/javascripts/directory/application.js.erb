@@ -511,6 +511,13 @@ Law, Silicon Valley, public media organizations, archives, standards-making bodi
                           }                                                                                                                                                                                                                                          
     };
 
+    $scope.upgradeOverLimit = function () {
+      mixpanel.track(
+        "Clicked Upgrade",{
+          "Source": "Over limit"
+        }
+      )
+    };
 
     $scope.$on('$routeChangeStart', function(event, next) {
       if (typeof next !== 'undefined') {
@@ -627,6 +634,7 @@ Law, Silicon Valley, public media organizations, archives, standards-making bodi
   }]);
 
 }());
+
 
 $(document).on("click", ".fa-search", function() {$(".navbar-form").slideToggle();});
 

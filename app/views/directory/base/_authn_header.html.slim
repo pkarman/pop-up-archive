@@ -18,7 +18,7 @@
         a href="/account" 
           | monthly limit
         | .&nbsp;
-        a href="/account/plan"
+        a ng-click="upgradeOverLimit()" href="/account/plan"
           | Upgrade now!
       .over-limit-msg.alert.alert-error.ng-cloak ng-show="currentUser.offerEnded && !currentUser.hasCard"
         | Your 
