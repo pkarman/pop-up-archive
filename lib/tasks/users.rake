@@ -86,7 +86,7 @@ namespace :users do
   desc "Update user subsription plan in mixpanel"
   task mixpanel_plan: [:environment] do
     User.all.each do |user|
-      MixpanelPeopleWorker.perform_async(user.email, {'$plan' => user.plan_id})
+      MixpanelPeopleWorker.perform_async(user.email, {'$name' => user.name, '$email' => user.email,'$plan' => user.plan_id})
     end
   end
 
