@@ -7,6 +7,7 @@ describe FeedPopUp do
 
   let(:feed_url) { 'file://'+Dir.pwd+'/spec/factories/files/feed-atom.xml' }
 
+
   it "should be constructed with dry_run option" do
     FeedPopUp.new.dry_run.should == false
     FeedPopUp.new(true).dry_run.should == true
@@ -23,7 +24,7 @@ describe FeedPopUp do
 
   it "should process a real feed" do
     collection = FactoryGirl.create :collection_private
-    FeedPopUp.update_from_feed(feed_url, collection.id).should eq 25
+    FeedPopUp.update_from_feed(feed_url, collection.id).should eq 11
   end
 
   describe "add audio files" do

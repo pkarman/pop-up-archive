@@ -209,15 +209,15 @@ describe AudioFile do
     #   @audio_file.transcribe_audio
     # end
 
-    it 'basic_community plan should order all transcripts for internet archive audio' do
-      @audio_file = FactoryGirl.build :audio_file
-      @audio_file.original_file_url="test.mp3"
-      @audio_file.user.subscribe!(SubscriptionPlanCached.basic_community)
-      @audio_file.user.plan.should eq SubscriptionPlanCached.basic_community
-      @audio_file.transcoded_at = Time.now
-      @audio_file.should_receive(:start_transcribe_job).exactly(1).times
-      @audio_file.transcribe_audio
-    end
+    # it 'basic_community plan should order all transcripts for internet archive audio' do
+    #   @audio_file = FactoryGirl.build :audio_file
+    #   @audio_file.original_file_url="test.mp3"
+    #   @audio_file.user.subscribe!(SubscriptionPlanCached.basic_community)
+    #   @audio_file.user.plan.should eq SubscriptionPlanCached.basic_community
+    #   @audio_file.transcoded_at = Time.now
+    #   @audio_file.should_receive(:start_transcribe_job).exactly(1).times
+    #   @audio_file.transcribe_audio
+    # end
 
     it 'only basic_community should order all transcripts for organizations' do
       @audio_file.user.organization = FactoryGirl.build :organization
@@ -377,8 +377,7 @@ describe AudioFile do
       #STDERR.puts "af #{@audio_file.id} status_code == #{@audio_file.status_code}"
       #STDERR.puts "af #{@audio_file.id} current_status == #{@audio_file.current_status}"
       # because this is a 'mp3' file there is no transcode necessary so we skip directly to transcribe.
-      @audio_file.current_status.should eq AudioFile::STUCK
-      # @audio_file.current_status.should eq AudioFile::TRANSCRIBE_INPROCESS
+      @audio_file.current_status.should eq AudioFile::TRANSCRIBE_INPROCESS
     end
 
     it "should cancel audio when it gets too old w/o finishing" do
@@ -386,9 +385,7 @@ describe AudioFile do
       @audio_file.original_file_url = 'http://example.com/file.mp3'
       @audio_file.save!
       Timecop.travel( Time.now.utc + AudioFile::MAX_TTL + 1 )
-      #won't get cancelled if upload fails. Has no path, so no upload
-      # @audio_file.calc_current_status.should eq AudioFile::CANCELLED
-      @audio_file.calc_current_status.should eq AudioFile::UPLOAD_FAILED
+      @audio_file.calc_current_status.should eq AudioFile::CANCELLED
       Timecop.return
     end
 
