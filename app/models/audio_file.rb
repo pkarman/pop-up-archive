@@ -368,7 +368,7 @@ class AudioFile < ActiveRecord::Base
 
   def transcribe_audio(user=self.user)
     #for IA only start if transcode complete
-    return if self.collection.extra["skip_transcript"] = true
+    return if self.collection.extra["skip_transcript"] == true
     return if !self.transcoded? and storage.at_internet_archive?
     # only start if transcode is complete
     return unless self.transcoded? or self.is_mp3? or self.is_mp3_transcode_complete?

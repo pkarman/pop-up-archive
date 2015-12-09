@@ -208,15 +208,15 @@ describe AudioFile do
       @audio_file.transcribe_audio
     end
 
-    it 'basic_community plan should order all transcripts for internet archive audio' do
-      @audio_file = FactoryGirl.build :audio_file
-      @audio_file.original_file_url="test.mp3"
-      @audio_file.user.subscribe!(SubscriptionPlanCached.basic_community)
-      @audio_file.user.plan.should eq SubscriptionPlanCached.basic_community
-      @audio_file.transcoded_at = Time.now
-      @audio_file.should_receive(:start_transcribe_job).exactly(1).times
-      @audio_file.transcribe_audio
-    end
+    # it 'basic_community plan should order all transcripts for internet archive audio' do
+    #   @audio_file = FactoryGirl.build :audio_file
+    #   @audio_file.original_file_url="test.mp3"
+    #   @audio_file.user.subscribe!(SubscriptionPlanCached.basic_community)
+    #   @audio_file.user.plan.should eq SubscriptionPlanCached.basic_community
+    #   @audio_file.transcoded_at = Time.now
+    #   @audio_file.should_receive(:start_transcribe_job).exactly(1).times
+    #   @audio_file.transcribe_audio
+    # end
 
     it 'only basic_community should order all transcripts for organizations' do
       @audio_file.user.organization = FactoryGirl.build :organization
