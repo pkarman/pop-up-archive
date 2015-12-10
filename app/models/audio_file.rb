@@ -350,6 +350,7 @@ class AudioFile < ActiveRecord::Base
 
   def premium_transcribe_audio(user=self.user)
     # only start this if transcode is complete
+    return if self.collection.extra["skip_transcript"] == true
     return unless transcoded_at or self.is_mp3? or is_mp3_transcode_complete?
     return unless ((user && user.plan.has_premium_transcripts?) || item.is_premium?)
 
@@ -367,6 +368,7 @@ class AudioFile < ActiveRecord::Base
 
   def transcribe_audio(user=self.user)
     #for IA only start if transcode complete
+    return if self.collection.extra["skip_transcript"] == true
     return if !self.transcoded? and storage.at_internet_archive?
     # only start if transcode is complete
     return unless self.transcoded? or self.is_mp3? or self.is_mp3_transcode_complete?
@@ -948,19 +950,20 @@ class AudioFile < ActiveRecord::Base
   end
   
   def retry_transcription_creation
-    return if (duration.to_i <= 0)
-    if !self.user.entity.plan.has_premium_transcripts?
-      extras = { 'original' => process_file_url, 'user_id' => user.try(:id) }
-      task = Tasks::TranscribeTask.new( identifier: 'ts_all', extras: extras )
-      self.tasks << task
-      task
-    elsif ENV['PREMIUM_TRANSCRIBER'] && ENV['PREMIUM_TRANSCRIBER'] == "voicebase"
-      extras = { 'original' => process_file_url, 'user_id' => user.try(:id), 'ondemand' => true }
-      task = Tasks::VoicebaseTranscribeTask.new(identifier: 'ts_paid', extras: extras)
-      self.tasks << task
-      task
-    else
-      return nil
+    begin
+      if ENV['PREMIUM_TRANSCRIBER'] && ENV['PREMIUM_TRANSCRIBER'] == "voicebase"
+        extras = { 'original' => process_file_url, 'user_id' => user.try(:id), 'ondemand' => true }
+        task = Tasks::VoicebaseTranscribeTask.new(identifier: 'ts_paid', extras: extras)
+        self.tasks << task
+        task
+      else 
+        extras = { 'original' => process_file_url, 'user_id' => user.try(:id) }
+        task = Tasks::TranscribeTask.new( identifier: 'ts_all', extras: extras )
+        self.tasks << task
+        task
+      end
+    rescue => e
+      Rails.logger.warn(e)
     end
   end
 

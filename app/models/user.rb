@@ -177,6 +177,7 @@ class User < ActiveRecord::Base
     if (offer == 'radiorace')
       subscr.plan = plan.id
       subscr.metadata[:offer_end] = 30.days.from_now.to_i
+      orig_plan = plan
     else
       # see https://github.com/popuparchive/pop-up-archive/issues/1011
       # initial sign-up has "trial" until the first day of the next month.
@@ -213,7 +214,7 @@ class User < ActiveRecord::Base
           trial_end = customer.class.end_of_this_month
         end
       end 
-
+      
       subscr.plan = plan.id
       subscr.coupon = offer if (offer && offer.length)
       subscr.trial_end = trial_end if trial_end
@@ -234,7 +235,10 @@ class User < ActiveRecord::Base
     subscr.save
 
     # log it
-    MixpanelWorker.perform_async('subscription change', { customer: customer_id, orig_plan: orig_plan, new_plan: subscr.plan })
+    if subscr.plan.id != orig_plan.id
+      MixpanelWorker.perform_async(self.email, 'subscription change', { customer: customer_id, orig_plan: orig_plan.name, new_plan: subscr.plan.name })
+      MixpanelPeopleWorker.perform_async(self.email, {'$plan' => subscr.plan.id})
+    end
 
     # must do this manually after subscription.save has successfully completed
     # so that our local caches are in sync.
