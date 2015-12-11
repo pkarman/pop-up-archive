@@ -23,7 +23,7 @@
     .plan-pricing
       | {{me.totalMeteredStorage | timeCode: 'words'}} - {{me.plan.amount / 100 | currency }}/{{me.plan.interval | shortInterval }}
       small
-        a href="/account/plan" Change My Plan.
+        a ng-click="changemyPlan()" href="/account/plan" Change My Plan.
 
 .row ng-hide="me.plan.amount"
   .well
