@@ -1,6 +1,9 @@
 #pricing
-  a.pull-right ng-click="togglePlans()"
-    |{{!longInterval && 'Get 10% off when you sign up for a yearly plan.' || 'Return to monthly plans.' }}
+  / a.pull-right ng-click="togglePlans()"
+  /   |{{!longInterval && 'Get 10% off when you sign up for a yearly plan.' || 'Return to monthly plans.' }}
+  h5
+    a href="https://popuparchiveorg.zendesk.com/hc/en-us/articles/215076208"
+      | Are you a freelancer? Have a one-time project? Learn how to use Pop Up if you don’t need a recurring plan.
   .row
     .col-md-12
       h2.center Personal Plans
@@ -109,10 +112,14 @@
             | to process payments. 
 
         li 
-          p.question I don't need a plan. Can I pay for the one time processing of a backlog of audio?
-          p If you'd like to use our services for the one time processing of a large collection, rather than on an ongoing basis, fill out the Enterprise form above to get a quote for your audio collection.
+          p.question I don't need a plan. Can I pay for one time processing?
+          p 
+            | If you'd like to use our services for one time processing, you can sign up for a monthly plan and then downgrade before the end of the calendar month. 
+            a href="https://popuparchiveorg.zendesk.com/hc/en-us/articles/215076208"
+              | For details, read more here
+            |. If you have more than 25 hours of audio, fill out the Enterprise form above to get a quote for your audio collection.
 
-          p After upload, continued access to private uploaded content as well as the Pop Up Archive dashboard and editing features will always require a plan.
+          p After processing your audio for transcripts, you can continue to access private uploaded content as well as the Pop Up Archive dashboard and editing features even from the free plan.
         li
           p.question What does “hours of processing” refer to?
           p "Hours of processing" refers to the hours of audio that you've uploaded to Pop Up Archive collections that have received machine transcripts. You will not be charged for files that do not successfully transcribe.
