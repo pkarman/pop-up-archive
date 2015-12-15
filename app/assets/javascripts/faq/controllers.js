@@ -67,8 +67,8 @@ angular.module('Directory.faq.controllers', ['Directory.loader', 'Directory.user
 					answer: "Yes, you will be able to upload the number of hours available to your plan each month.",
 				},
 				{
-					question: "Can I use Pop Up Archive for the one-time processing of a large backlog of audio?",
-					answer: "Yes! If you'd like to use our services for one-time processing of a large collection, rather than on an on-going basis, contact us at edison@popuparchive.com to get a quote for your audio collection."
+					question: "Can I use Pop Up Archive for one-time processing?",
+					answer: "Yes! If you'd like to use our services for one-time processing rather than on an on-going basis, you can sign up for a plan and downgrade to the free plan when your audio is processed. As long as you downgrade before the end of the calendar month, you will only be charged a pro-rated amount based on your usage and the plan rate. For example, you will be charged $30 for two hours of audio uploaded to the $75/mo five-hour plan. If you have more than 25 hours of audio, contact us at edison@popuparchive.com to get a quote for your audio collection."
 				},
 				{
 					question: "I’d like for my whole audio team to use Pop Up Archive. Is there a team plan?",
