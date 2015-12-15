@@ -113,6 +113,12 @@ can find and hear exactly what they're looking for."
       title: "Account &raquol Plans &raquo Radio Race Special Offer",
       loginRequired: true
     })
+    .when('/refer', {
+      templateUrl: "<%= asset_path 'account/referral.html' %>",
+      controller: "ReferralCtrl",
+      title: "Refer a Friend",
+      loginRequired: true
+    })
     .when('/collections', {
       templateUrl: "<%= asset_path 'collections/index.html' %>",
       controller: "CollectionsCtrl",
