@@ -922,7 +922,13 @@ class AudioFile < ActiveRecord::Base
   end
 
   def best_transcript(language='en-US')
-    if self.has_premium_transcript?
+    if self.transcripts.any? { |t| t.updated_at > t.created_at}
+      self.transcripts.each do |t|
+        if t.updated_at > t.created_at
+          return t
+        end
+      end
+    elsif self.has_premium_transcript?
       self.transcripts.each do |t|
         if t.is_premium? && t.language == language
           return t
