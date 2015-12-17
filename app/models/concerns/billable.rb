@@ -355,7 +355,11 @@ module Billable
   end
 
   def is_over_monthly_limit?
-    self.entity.hours_remaining <= 0.0
+    user=self.entity
+    hours_remaining=user.hours_remaining
+    over_limit = (hours_remaining <= 0.0)
+    MixpanelPeopleWorker.perform_async(self.email, {'$hours_remaining' => hours_remaining, '$is_over_monthly_limit' => over_limit})
+    over_limit
   end
 
   def prorated_charge_for_month(dtim)

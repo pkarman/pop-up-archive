@@ -294,7 +294,10 @@ class Transcript < ActiveRecord::Base
   end
 
   def update_usage
-    audio_file.user.calculate_monthly_usages!
+    user=audio_file.user
+    user.calculate_monthly_usages!
+    usage = user.usage_for(MonthlyUsage::PREMIUM_TRANSCRIPTS)
+    MixpanelPeopleWorker.perform_async(user.email, {'$montly_usage' => usage, '$last_updated' => Time.now})
   end
 
 end
