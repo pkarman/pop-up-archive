@@ -1,11 +1,7 @@
 #FOR USE WITH RVM
 if [ -f "$rvm_path/scripts/rvm" ]; then
   source "$rvm_path/scripts/rvm"
-
-  if [ -f ".ruby-version" ]; then
-    rvm use `cat .ruby-version`
-  fi
-
+  rvm use .
 fi
 
 #if [ -f /tmp/powenvsetup ]; then
