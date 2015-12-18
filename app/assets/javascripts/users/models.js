@@ -218,6 +218,9 @@ angular.module('Directory.users.models', ['RailsModel'])
     if (typeof offerCode !== 'undefined') {
       sub.offer = offerCode;
     }
+    if(window.location['pathname'] === '/pricing/demo-discount') {
+      sub.offer = '#DemoDiscount'
+    }
     return sub.update().then(function (plan) {
       return User.get('me');
     }, function(error) {

@@ -7,8 +7,12 @@ section.modal ng-controller="AccountCtrl"
         h4
           |Are you sure you'd like to change your plan from {{me.plan.name}} ({{me.plan.interval}}) to {{plan.name}} ({{plan.interval}}) ? 
           
-        p
+        p ng-hide="hasDemoCoupon()"
           |Total: ${{plan.amount/100}} per {{plan.interval}}
+        p ng-show="hasDemoCoupon()"
+          |Your #DemoDiscount will be applied to your first invoice. Thanks!
+          br
+          |Total: ${{(plan.amount/100) - (plan.amount/100 *.2)}}
         p  
           | Questions or concerns? See our &nbsp;
           a href="/terms_of_use" target="_blank" Terms of Service

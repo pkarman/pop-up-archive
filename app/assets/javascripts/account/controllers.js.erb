@@ -70,6 +70,15 @@ angular.module('Directory.account.controllers', ['stripe', 'Directory.account.mo
     $scope.showCreditModal();
   });
 
+  $scope.hasDemoCoupon = function($location) {
+    var plan = $scope.me.plan.id
+    if(window.location['pathname'] != '/pricing/demo-discount')  {
+      return false
+    }else if (!plan.match(/small_business/g)) {
+      return true
+    }
+  };
+
   $scope.toggleDetails = function($event) {
     var btn = $($event.target);
     // make sure we actually have the button and not the icon
@@ -149,9 +158,10 @@ angular.module('Directory.account.controllers', ['stripe', 'Directory.account.mo
   };
 
   $scope.hasDemoCoupon = function($location) {
+    var plan = $scope.me.plan.id
     if(window.location['pathname'] != '/pricing/demo-discount') {
       return false
-    }else {
+    }else if(!plan.match(/small_business/g))  {
       return true
     }
   };
