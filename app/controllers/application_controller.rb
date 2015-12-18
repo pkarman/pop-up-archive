@@ -45,6 +45,13 @@ class ApplicationController < ActionController::Base
       session[:adobe] = false
     end
   end
+  
+  def invite
+    @mail = params[:mail_details]
+    MyMailer.mailto(@mail['subject'], @mail['body'], @mail['to']).deliver_now
+
+    render nothing: true
+  end
 
   private
 

@@ -147,6 +147,14 @@ angular.module('Directory.account.controllers', ['stripe', 'Directory.account.mo
     });
     return special;
   };
+
+  $scope.hasDemoCoupon = function($location) {
+    if(window.location['pathname'] != '/pricing/demo-discount') {
+      return false
+    }else {
+      return true
+    }
+  };
   
   subscribe = function (plan) {
     $scope.plan = plan;
@@ -273,26 +281,47 @@ angular.module('Directory.account.controllers', ['stripe', 'Directory.account.mo
 }])
 
 .controller('ReferralCtrl', ['$scope', 'Me', 'Plan', '$location', function ($scope, Me, Plan, $location) { 
-  // Plan.get().then(function (plans) {   
-  //   angular.forEach(plans, function (plan) {   
-  //     if (plan.interval == 'month' && plan.name == "Radio Race Free Trial") {     
-  //       suggest = plan;         
-  //     }
-  //   });     
-  //   $scope.plan = suggest;
-  // });
-  // $scope.signUpPua=function () {
-  //   Me.authenticated(function (me) { 
-  //     var currentUser = $scope.currentUser || $scope.me;
-  //     $scope.me = me;
-  //     $scope.signingUp = true;   
-  //     $scope.me.subscribe($scope.plan.id, 'radiorace').then(function () {    
-  //       $location.path('/account');    
-  //     }); 
-  //   })
-  // }
-  // $scope.signUpNew=function () {
-  //   $scope.signingUp = true;   
-  //   window.location.href = '/users/sign_up?plan_id=' + $scope.plan.id + '&offer_code=radiorace';          
-  // }
+    var emails = [0,1,2];
+    $scope.emails = emails
+    $scope.text = 'me@example.com';
+    var currentUser = $scope.currentUser || $scope.me;
+    
+    $scope.addIndex = function(emailsCount) {
+      var newField = emails[emails.length-1] +1
+      emails.push(newField)
+    };
+
+    $scope.sendMail = function(me) {
+      var addresses=[]
+      var currentUser = $scope.currentUser || $scope.me;
+      var formFields = $('input')
+      var form = $('#emailForm')
+      $scope.param = "demo-discount"
+      for (i = 1; i < formFields.length; i++) {
+        var data = {"mail_details":{}}
+        data['mail_details']['to'] = formFields[i].value;
+        data['mail_details']['body'] = $('#emailBody').val();
+        data['mail_details']['subject'] = "Discount on audio transcripts";
+        var request = $.ajax({
+                        url: '/invite/',
+                        type: "POST",
+                        data: JSON.stringify(data),
+                        contentType: 'application/json; charset=utf-8',
+                        dataType: "json",
+                    });
+
+                    request.done(function(msg) {
+                        // increment()
+                        // alert("Your invite has been sent. Use the code #DemoDiscount when you upgrade for 20% off!");
+                    });
+
+                    request.fail(function(jqXHR, textStatus) {
+                        // alert( "Something went wrong. Please try again.");
+                    });
+      }
+    
+      $location.path('/pricing/' + $scope.param);
+      
+    };
+    $scope.email = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+(?:[A-Z]{2}|com|org|net|gov|mil|biz|info|mobi|name|aero|jobs|museum)\b/;
 }])

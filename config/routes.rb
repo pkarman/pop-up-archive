@@ -51,7 +51,7 @@ PopUpArchive::Application.routes.draw do
   get 'test/show', controller: 'test', action: 'show'
 
   post 'callback/test',      controller: 'callbacks', action: 'tester'
-
+  post '/invite', controller: 'application', action: 'invite'
   post 'fixer_callback/:id', controller: 'callbacks', action: 'fixer', as: 'audio_file_fixer_callback', model_name: 'audio_file'
 
   post 'fixer_callback/files/:model_name/:id', controller: 'callbacks', action: 'fixer', as: 'fixer_callback'

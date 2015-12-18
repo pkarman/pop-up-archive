@@ -7,19 +7,43 @@
 
         h3 Invite 3 or more friends for 20% off your first month.
         
-        form.form_horizontal 
-          div.col-sm-offset-2 style='margin-top: 50px;'
-            div.text-right.col-sm-2         
+        form.form_horizontal id="emailForm" name="referralForm" ng-controller="ReferralCtrl" 
+          div style='margin-top: 50px;'
+            div.col-sm-12.text-left.col-sm-offset-3         
               label.control-label
                 | TO :
-            div.col-sm-6
-              input.text.form-control type='text' placeholder="Enter emails separated by commas" 
-            br  
-            div.col-md-8.col-md-offset-1 style='margin-top: 50px;'   
-              textarea.form-control rows="6"
-                | Have you checked out Pop Up Archive? If you sign up for a paid plan with the promo code #PopUpFriend, you can get 20% off your |first month!
-            br
-            div.col-md-1.col-sm-offset-8.text-center style='margin-top: 50px;'
-              button.btn.btn-default type="button" ng-click="" Invite
+            div.email-list.col-md-6.col-md-offset-3 ng-form="subForm" ng-repeat="i in emails"
+              input.form-control type='email' name='email' ng-data-model='email' id='{{i}}' ng-model='email' placeholder="Enter an email address" required="true" style='margin-top: 30px;'
+              div role='alert'
+                span.error ng-show="subForm.email.$error.email && subForm.email.$dirty"
+                  | This email addresses is invalid. Please try again.
+            span.col-md-3.col-md-offset-7.glyphicon.glyphicon-plus ng-click="addIndex()" style="margin-top: 25px;"
+              | another.
+            span.error.col-md-6.col-md-offset-3 ng-show="referralForm.$invalid" 
+              span.lead style='margin-bottom=40px'
+                | Please enter at least 3 email addresses.
+                br
+            div.col-md-8.col-md-offset-2 style='margin-top: 50px;'   
+              textarea.form-control id="emailBody" ng-data-model='emailBody' rows="6"
+                
+                | Hi,
+                
+                | I've been using Pop Up Archive — a service that makes audio searchable with high-accuracy automatic transcripts — and thought
+                | you might be interested. Pop Up Archive saves me tons of time transcribing, and allows me to search for exact words and phrases 
+                | within audio files. 
+                   
+                | If you sign up with promo code #PopUpFriend, you can get 20% off of your first month. There's also a free demo you can try out. 
+                | Click here to learn more!
+                
+                |  Thanks,
+                |  {{me.name}}
+            
+            div.col-md-2.col-md-offset-5.text-center style='margin-top: 50px;'
+              button.btn.btn-default.btn-lg.raised type="button" ng-disabled="referralForm.$invalid" ng-click="showcode=true; sendMail()"  style="background: #F25A4C; padding-left: 30px; padding-right: 30px; font-weight: bold; color: white" INVITE
+            
+            div.col-sm-6.col-sm-offset-3.text-center style='margin-top: 40px; margin-bottom: 40px;'
+              | Enter 3+ emails and press send to see your promo code!
 
+            div.col-md-2.col-md-offset-5 ng-show="showcode" style='height: 40px; border: 1px solid black; margin-bottom: 100px; border-radius: 5px; padding-top: 10px;'
+              | #DemoDiscount
 
