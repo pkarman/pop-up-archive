@@ -1,16 +1,11 @@
 #pricing
-<<<<<<< Updated upstream
-  / a.pull-right ng-click="togglePlans()"
-  /   |{{!longInterval && 'Get 10% off when you sign up for a yearly plan.' || 'Return to monthly plans.' }}
-  h5
-    a href="https://popuparchiveorg.zendesk.com/hc/en-us/articles/215076208"
-      | Are you a freelancer? Have a one-time project? Learn how to use Pop Up if you don’t need a recurring plan.
-=======
-  h3.pull-left ng-show="hasDemoCoupon()" 
+  h3 ng-show="hasDemoCoupon()" 
     | Get 20% off your first month when you use the code #DemoDiscount at checkout! 
   a.pull-right ng-click="togglePlans()"
     |{{!longInterval && 'Get 10% off when you sign up for a yearly plan.' || 'Return to monthly plans.' }}
->>>>>>> Stashed changes
+  h5
+    a href="https://popuparchiveorg.zendesk.com/hc/en-us/articles/215076208"
+      | Are you a freelancer? Have a one-time project? Learn how to use Pop Up if you don’t need a recurring plan.
   .row
     .col-md-12
       h2.center Personal Plans
