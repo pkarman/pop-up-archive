@@ -136,14 +136,13 @@ angular.module('Directory.account.controllers', ['stripe', 'Directory.account.mo
     $scope.me = me;
     $scope.pendingPlan = me.plan.id;
     $scope.interval = me.plan.interval;
-    console.log($scope.me);
   });
 
   $scope.interval = 'month';
 
   $scope.isCurrentPlan = function (plan) {
     return plan && $scope.me && $scope.me.plan && plan.id == $scope.me.plan.id;
-    console.log($scope.me.plan.id);
+    
   };
 
   $scope.hasSpecialPlan = function () {
@@ -291,11 +290,30 @@ angular.module('Directory.account.controllers', ['stripe', 'Directory.account.mo
 }])
 
 .controller('ReferralCtrl', ['$scope', 'Me', 'Plan', '$location', function ($scope, Me, Plan, $location) { 
+
+    Me.authenticated(function (me) {
+      $scope.me = me;
+      $scope.emailBody = " Hi, \n \n I've been using Pop Up Archive — a service that makes audio searchable with high-accuracy automatic transcripts — and thought you might be interested. Pop Up Archive saves me tons of time transcribing, and allows me to search for exact words and phrases within audio files. \n \n If you sign up with promo code #PopUpFriend, you can get 20% off of your first month. There's also a free demo you can try out. Click the link below to learn more! \n \n Thanks, " + $scope.me.name + "\n pop-up-archive.dev/pricing"
+      $scope.plan = $scope.me.plan
+    });
     var emails = [0,1,2];
-    $scope.emails = emails
-    $scope.text = 'me@example.com';
+    $scope.emails = emails;
+      // sender: $scope.me.name,
+      // link: "www.popuparchive.com"
+
     var currentUser = $scope.currentUser || $scope.me;
+    $scope.text = 'me@example.com';
     
+    isPaidPlan = function() {
+      $scope.plan = $scope.currentUser.plan.id
+      console.log($scope.plan)
+      if ($scope.plan.match(/small_business/g)) {
+        return true
+      }else {
+        return false
+      }
+    };
+
     $scope.addIndex = function(emailsCount) {
       var newField = emails[emails.length-1] +1
       emails.push(newField)
