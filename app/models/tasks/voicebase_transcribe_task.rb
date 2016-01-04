@@ -25,7 +25,7 @@ class Tasks::VoicebaseTranscribeTask < Task
       self.extras['error'] = 'No owner/audio_file found'
       self.save!
       return
-     end
+    end
 
     # download audio file
     data_file = download_audio_file
@@ -36,17 +36,28 @@ class Tasks::VoicebaseTranscribeTask < Task
 
     # create the remote job
     client = self.class.voicebase_client
+    executor = nil
+    diarization = false
+    if ENV['VOICEBASE_API_VERSION'] == '2.0'
+      executor = "v2"
+      diarization = true
+      puts "Setting 2.0 vars....."
+    end
     conf = { 
       configuration: { 
         transcripts: { engine: "premium" },
+        executor: executor,
+        ingest: { 
+          diarization: diarization
+        },
         publish: { 
           callbacks: [{  
             method: "POST", 
             include: ["transcripts", "topics", "metadata"], 
             url: voicebase_call_back_url(),
           }]  
-        }   
-      }   
+        }
+      } 
     }.to_json
     begin
       resp = client.upload( 
