@@ -1,6 +1,8 @@
 #pricing
   h3 ng-show="hasDemoCoupon()" 
     | Thanks for referring! Get 20% off now with our #DemoDiscount! 
+  h3 ng-show="hasFriendCoupon()"
+    | Get 20% off now with our #PopUpFriend
   a.pull-right ng-click="togglePlans()"
     |{{!longInterval && 'Get 10% off when you sign up for a yearly plan.' || 'Return to monthly plans.' }}
   h5

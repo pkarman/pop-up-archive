@@ -24,9 +24,8 @@
       strong #{plan.hours} hour&nbsp;
       | plan at the rate of&nbsp;
       strong #{number_to_currency(plan.amount/100)} per #{plan.interval}
-      - if offer_code == 'prx'
-        | <br>with a <strong>30-day free trial</strong> offer especially for <strong>Radio Race participants</strong>
-      |.
+      - if offer_code == 'PopUpFriend'
+        | <br>Get 20% off your first month now thanks to our<strong> #PopUpFriend </strong> offer.
     - else
       | You are signing up for the&nbsp;
       strong Free&nbsp;

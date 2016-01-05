@@ -376,6 +376,11 @@ class User < ActiveRecord::Base
     self.save!
   end
 
+  def credit_referrer(id)
+    referrer = User.find(id)
+    referrer.subscribe!(referrer.plan, "PopUpFriend")
+  end
+
   def customer
     return @_customer if !@_customer.nil?
     return unless self.email

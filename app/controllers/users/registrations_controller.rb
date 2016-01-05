@@ -43,6 +43,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
     session[:plan_id] = "premium_community" if params[:plan_id] == "community"
     session[:card_token] = params[:card_token] if params[:card_token].present?
     session[:offer_code] = params[:offer_code] if params[:offer_code].present?
+    session[:referrer] = params[:ui] if params[:ui].present?
     super
 
   end
@@ -86,6 +87,10 @@ class Users::RegistrationsController < Devise::RegistrationsController
     if session[:plan_id].present?
       plan_id = session.delete(:plan_id)
       user.subscribe!(SubscriptionPlanCached.find(plan_id), session.delete(:offer_code))
+      if session[:referrer] 
+        referrer_id = session[:referrer]
+        user.credit_referrer(referrer_id) 
+      end
       return unless Rails.env == 'production'
       gb = Gibbon::API.new
       gb.lists.subscribe(:id => "39650ec21b",

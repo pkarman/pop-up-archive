@@ -50,7 +50,7 @@ angular.module('Directory.account.models', [])
 }])
 
 
-.factory('Subscribe', ['Model', '$rootScope', 'Plan', '$window', '$modal', function (Model, $rootScope, Plan, $window, $modal) {
+.factory('Subscribe', ['Model', '$rootScope', 'Plan', '$window', '$modal', '$location', function (Model, $rootScope, Plan, $window, $modal, $location) {
   $rootScope.interval = 'month';
   $rootScope.offer = $rootScope.offer || {};
   $rootScope.community = Plan.community();
@@ -80,6 +80,18 @@ angular.module('Directory.account.models', [])
     $rootScope.interval = ( $rootScope.interval == 'year' ? 'month' : 'year');
     $rootScope.longInterval = !$rootScope.longInterval;
     $rootScope.planOffset = ( $rootScope.planOffset == '2' ? '3' : '2');
+  };
+
+  $rootScope.hasFriendCoupon = function($location) {
+    if (window.location['pathname'].includes('ui')) {
+      var referrer_string = window.location.search.split('ui=')[1]
+      var referrer_exists = referrer_string.match(/^[0-9]*$/g)
+      if (referrer_exists != null)  {
+        return true
+      } else {
+        return false
+      }
+    }  
   };
 
   $rootScope.isDisabled = function(plan) {

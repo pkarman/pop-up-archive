@@ -29,6 +29,7 @@ angular.module('Directory.users.models', ['RailsModel'])
     return false;
   };
 
+
   User.prototype.canEdit = function (obj) {
     if (this.authenticated() && obj && obj.collectionId) {
       return (this.collectionIds.indexOf(obj.collectionId) > -1);
@@ -80,7 +81,7 @@ angular.module('Directory.users.models', ['RailsModel'])
   User.prototype.hasPremiumTranscripts = function() {
     return this.plan.isPremium;
   };
-
+  
   User.prototype.defaultTranscriptType = function() {
     return this.hasPremiumTranscripts() ? "premium" : "basic";
   };
@@ -221,6 +222,11 @@ angular.module('Directory.users.models', ['RailsModel'])
     if(window.location['pathname'] === '/pricing/demo-discount') {
       sub.offer = '#DemoDiscount'
     }
+    
+    if(window.location['pathname'].includes('offer_code')) {
+      sub.offer = 'PopUpFriend'
+    } 
+
     return sub.update().then(function (plan) {
       return User.get('me');
     }, function(error) {

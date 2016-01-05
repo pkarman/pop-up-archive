@@ -1,18 +1,18 @@
-.intro.text-center 
-  h1 ng-show="currentUser.hasCommunityPlan" 
+.intro.text-center ng-controller="ReferralCtrl" 
+  h1 ng-show="!hasPaidPlan()" 
     | Refer a friend!
-  h1 ng-show="!currentUser.hasCommunityPlan" 
+  h1 ng-show="hasPaidPlan()" 
     | Give 20%, get 20%.
 
 .row.text-center      
     .col-xs-12
 
-        h3 ng-show="currentUser.hasCommunityPlan"
+        h3 ng-show="!hasPaidPlan()"
           | Invite 3 or more friends for 20% off your first month.
-        h3 ng-show='!currentUser.hasCommunityPlan' 
+        h3 ng-show='hasPaidPlan()' 
           | Get 20% off when a friend signs up with your promo code.
         
-        form.form_horizontal id="emailForm" name="referralForm" ng-controller="ReferralCtrl" 
+        form.form_horizontal id="emailForm" name="referralForm" 
           div style='margin-top: 50px;'
             div.col-sm-12.text-left.col-sm-offset-3         
               label.control-label
@@ -39,5 +39,7 @@
               | Enter 3+ emails and press send to see your promo code!
 
             div.col-md-2.col-md-offset-5 ng-show="showcode" style='height: 40px; border: 1px solid black; margin-bottom: 100px; border-radius: 5px; padding-top: 10px;'
+              div ng-show="!hasPaidPlan()"
               | #DemoDiscount
-
+              div ng-show="hasPaidPlan()"
+              | #PopUpFriend
