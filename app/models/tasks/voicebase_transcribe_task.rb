@@ -344,10 +344,8 @@ class Tasks::VoicebaseTranscribeTask < Task
       # so we do not assign speakers.
       #STDERR.puts response.pretty_inspect
 
-      # words = response.body.transcript.words
-      words = response.body['media']['transcripts']['latest']['words']
-      # speakers = response.body.transcripts.diarization
-      speakers = response.body['media']['transcripts']['latest']['diarization']
+      words = response.body.transcript.words
+      speakers = response.body.transcripts.diarization
 
       speaker_lookup = create_speakers(trans, speakers)
       # iterate through the words 
@@ -367,6 +365,7 @@ class Tasks::VoicebaseTranscribeTask < Task
       # m == metadata (flag for punctuation, speaker, etc)
 
         speaker = speakers[speaker_idx]
+        speaker_end = speaker ? (BigDecimal.new(speaker['start'].fdiv(1000).to_s) + BigDecimal.new(speaker['length'].fdiv(1000).to_s)) : row_end
       # we re-chunk up the individual words into phrases of ~ 5sec
         row_end = BigDecimal.new(row['e'].fdiv(1000).to_s)
         next_row = words[idx+1] ? words[idx+1] : nil
@@ -374,7 +373,6 @@ class Tasks::VoicebaseTranscribeTask < Task
         is_punc = false
         if tt
           tt[:end_time] = row_end
-          speaker_end = speaker ? (BigDecimal.new(speaker['start'].fdiv(1000).to_s) + BigDecimal.new(speaker['length'].fdiv(1000).to_s)) : row_end
           if row['m']
             # always keep punctuation with the word it follows
             if row['m'] == "punc"
