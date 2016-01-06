@@ -343,11 +343,18 @@ class Tasks::VoicebaseTranscribeTask < Task
       # Voicebase does not currently support speakers w/o clumsy stereo channel assignments,
       # so we do not assign speakers.
       #STDERR.puts response.pretty_inspect
-      words = response.body.transcript.words
 
+      # words = response.body.transcript.words
+      words = response.body['media']['transcripts']['latest']['words']
+      # speakers = response.body.transcripts.diarization
+      speakers = response.body['media']['transcripts']['latest']['diarization']
+
+      speaker_lookup = create_speakers(trans, speakers)
       # iterate through the words 
       tt = nil # re-use for re-chunking
       tt_confidences = []
+      speaker_idx = 0
+      prev_speaker = 1
       words.each_with_index do |row, idx|
       # example format
       # {"p"=>1, "c"=>0.904, "s"=>9, "e"=>2403, "w"=>"we"}
@@ -359,6 +366,7 @@ class Tasks::VoicebaseTranscribeTask < Task
       # w == word (term)
       # m == metadata (flag for punctuation, speaker, etc)
 
+        speaker = speakers[speaker_idx]
       # we re-chunk up the individual words into phrases of ~ 5sec
         row_end = BigDecimal.new(row['e'].fdiv(1000).to_s)
         next_row = words[idx+1] ? words[idx+1] : nil
@@ -366,6 +374,7 @@ class Tasks::VoicebaseTranscribeTask < Task
         is_punc = false
         if tt
           tt[:end_time] = row_end
+          speaker_end = speaker ? (BigDecimal.new(speaker['start'].fdiv(1000).to_s) + BigDecimal.new(speaker['length'].fdiv(1000).to_s)) : row_end
           if row['m']
             # always keep punctuation with the word it follows
             if row['m'] == "punc"
@@ -376,8 +385,14 @@ class Tasks::VoicebaseTranscribeTask < Task
             space = (row['w'] =~ /^[[:punct:]]/) ? '' : ' '
             tt[:text] += "#{space}#{row['w']}"
           end
+
+          if f (row_end > speaker_end)
+            tt.save
+            speaker_idx += 1
+            speaker = speakers[speaker_idx] ? speakers[speaker_idx] : speakers[prev_speaker] 
+            tt = nil
           # end the chunk if we are over 5sec and the next word is not punctuation.
-          if (row_end - tt[:start_time]) > 5.0 && (!next_row || !next_row['m'])
+          elsif (row_end - tt[:start_time]) > 5.0 && (!next_row || !next_row['m'])
             tt[:confidence] = tt_confidences.inject{ |sum, el| sum + el }.to_f / tt_confidences.size
             tt.save
             tt = nil
@@ -388,14 +403,25 @@ class Tasks::VoicebaseTranscribeTask < Task
             start_time: BigDecimal.new(row['s'].fdiv(1000).to_s),
             end_time:   BigDecimal.new(row['e'].fdiv(1000).to_s),
             text:       row['w'],
-            speaker_id: nil,  # some day...
+            speaker_id: speaker ? speaker_lookup[speaker['speakerLabel']].id : prev_speaker,
           })
+          prev_speaker = tt.speaker_id
         end
       end
 
       trans.save!
     end
     trans
+  end
+
+  def create_speakers(trans, speakers)
+    speakers_lookup = {}
+    speakers_by_name = speakers.inject({}) {|all, s| all.key?(s['speakerLabel']) ? all[s['speakerLabel']] << s : all[s['speakerLabel']] = [s]; all }
+    speakers_by_name.keys.each do |n|
+      times = speakers_by_name[n].collect{|r| [BigDecimal.new(r['start'].fdiv(1000).to_s), (BigDecimal.new(r['start'].fdiv(1000).to_s) + BigDecimal.new(r['length'].fdiv(1000).to_s))] }
+      speakers_lookup[n] = trans.speakers.create(speakerLabel: n, times: times)
+    end
+    speakers_lookup
   end
 
   def set_voicebase_defaults

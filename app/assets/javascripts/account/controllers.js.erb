@@ -329,16 +329,16 @@ angular.module('Directory.account.controllers', ['stripe', 'Directory.account.mo
       
     });
 
-    $scope.signUpReferral=function () {
-      Me.authenticated(function (me) { 
-        var currentUser = $scope.currentUser || $scope.me;
-        $scope.me = me;
-        $scope.signingUp = true;   
-        $scope.me.subscribe($scope.plan.id, '#PopUpFriend').then(function () {    
-          $location.path('/account');    
-        }); 
-      })
-    }
+    // $scope.signUpReferral=function () {
+    //   Me.authenticated(function (me) { 
+    //     var currentUser = $scope.currentUser || $scope.me;
+    //     $scope.me = me;
+    //     $scope.signingUp = true;   
+    //     $scope.me.subscribe($scope.plan.id, '#PopUpFriend').then(function () {    
+    //       $location.path('/account');    
+    //     }); 
+    //   })
+    // }
     
     var emails = [0,1,2];
     $scope.emails = emails;
@@ -374,7 +374,11 @@ angular.module('Directory.account.controllers', ['stripe', 'Directory.account.mo
       var currentUser = $scope.currentUser || $scope.me;
       var formFields = $('input')
       var form = $('#emailForm')
-      $scope.param = "demo-discount"
+      if (!currentUser.plan.id.match(/small_business/g)) {
+        $scope.param = "demo-discount"
+      } else {
+        $scope.param = "pop-up-friend"
+      }
       for (i = 1; i < formFields.length; i++) {
         var data = {"mail_details":{}}
         data['mail_details']['to'] = formFields[i].value;
@@ -397,7 +401,7 @@ angular.module('Directory.account.controllers', ['stripe', 'Directory.account.mo
                         // alert( "Something went wrong. Please try again.");
                     });
       }
-    
+      
       $location.path('/pricing/' + $scope.param);
       
     };
