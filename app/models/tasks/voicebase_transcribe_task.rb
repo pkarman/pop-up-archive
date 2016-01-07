@@ -344,8 +344,8 @@ class Tasks::VoicebaseTranscribeTask < Task
       # so we do not assign speakers.
       #STDERR.puts response.pretty_inspect
 
-      words = response.body.transcript.words
-      speakers = response.body.transcripts.diarization
+      words = response.words
+      speakers = response.diarization
 
       speaker_lookup = create_speakers(trans, speakers)
       # iterate through the words 
