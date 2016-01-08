@@ -122,8 +122,9 @@ let(:response) {
         "s"=>85670,
         "c"=>0.0,
         "p"=>96,
-        "m"=>"punc"}],
-      "speakers"=> 
+        "m"=>"punc"}]}
+      },
+      "speakers"=>{
         [{"speakerLabel"=>"S0", "band"=>"S", "start"=>1950, "length"=>5130, "gender"=>"M", "env"=>"U"},
          {"speakerLabel"=>"S0", "band"=>"S", "start"=>7080, "length"=>8550, "gender"=>"M", "env"=>"U"},
          {"speakerLabel"=>"S11", "band"=>"S", "start"=>15630, "length"=>10710, "gender"=>"M", "env"=>"U"},
@@ -135,7 +136,6 @@ let(:response) {
          {"speakerLabel"=>"S11", "band"=>"S", "start"=>72250, "length"=>3720, "gender"=>"M", "env"=>"U"},
          {"speakerLabel"=>"S0", "band"=>"S", "start"=>75970, "length"=>6030, "gender"=>"M", "env"=>"U"},
          {"speakerLabel"=>"S0", "band"=>"S", "start"=>82000, "length"=>2090, "gender"=>"M", "env"=>"U"}]
-        }
       }
     m
   }
