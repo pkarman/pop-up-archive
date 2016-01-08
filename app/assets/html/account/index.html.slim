@@ -66,8 +66,8 @@
         dd.usage-meter ng-class="{warning: me.usageSecs() >= me.totalMeteredStorage, full: me.usageSecs() >= me.totalMeteredStorage }"
           .bar ng-style="{width: me.usageSecs() / me.totalMeteredStorage * 100 + '%'}"
           .meter-words() {{me.usageSecs() | timeCode: 'words'}} / {{me.totalMeteredStorage | timeCode: 'words'}}
-        dt Total Hours
-        dd.usage() {{me.usageHours()}}
+        dt ng-show="me.communityPlanHoursUsed > 0 || me.plan.id === 'premium_community'" 1-Hour Demo
+        dd ng-show="me.communityPlanHoursUsed > 0 || me.plan.id === 'premium_community'" {{me.communityPlanHoursUsed()}}
     hr
     .usage-history
       h5 History

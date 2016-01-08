@@ -124,6 +124,10 @@ angular.module('Directory.users.models', ['RailsModel'])
     }
   };
 
+  User.prototype.communityPlanHoursUsed = function() {
+    return (this.communityPlanUsed / 3600)
+  }
+
   User.prototype.buildUsageSummary = function() {
     var self = this;
     var groups = [];
