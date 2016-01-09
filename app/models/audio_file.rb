@@ -48,6 +48,7 @@ class AudioFile < ActiveRecord::Base
   TRANSCODING_INPROCESS       = 'Transcoding'
   TRANSCRIBE_INPROCESS        = 'Transcribing'
   STUCK                       = 'Processing'
+  ILLEGAL                     = 'Illegal Upload : User Over Monthly Limit'
   CANCELLED                   = 'Cancelled'
   BLANK_EMPTY_FILE            = 'Silent or Blank File'  
   # status enum
@@ -63,6 +64,7 @@ class AudioFile < ActiveRecord::Base
     I: 'TRANSCODING_INPROCESS',
     J: 'TRANSCRIBE_INPROCESS',
     K: 'STUCK',
+    L: 'ILLEGAL',
     X: 'CANCELLED',
     Z: 'BLANK_EMPTY_FILE'
   }
@@ -270,6 +272,7 @@ class AudioFile < ActiveRecord::Base
   def process_file
     # don't process file if no file to process yet (s3 upload)
     return if !has_file? && original_file_url.blank?
+    return if user_over_limit
 
     analyze_audio
 
@@ -976,6 +979,23 @@ class AudioFile < ActiveRecord::Base
   def reprocess_as_basic_transcript(user, identifier='ts_all', options={})
     extras = { 'original' => process_file_url, 'user_id' => user.try(:id), 'force_basic' => true }.merge(options)
     self.tasks << Tasks::TranscribeTask.new( identifier: identifier, extras: extras )
+  end
+
+  def user_over_limit
+    files = self.billable_to.audio_files
+    tallied_duration = 0
+    files.each do |f| 
+      if f.created_at.month == Date.now.month
+        tallied_duration += f.duration
+      end
+    end
+
+    if tallied_duration >= self.billable_to.plan.hours
+      do_not_process = true
+      self.status = ILLEGAL
+      self.status_code = "L"
+    end
+    do_not_process
   end
 
   private

@@ -62,7 +62,7 @@
       h5 ng-show="me.organization" Me, This Month ({{me.usage.summary.thisMonth.period}})
       h5 ng-hide="me.organization" This Month ({{me.usage.summary.thisMonth.period}})
       dl.dl-horizontal
-        dt Usage 
+        dt Estimated 
         dd.usage-meter ng-class="{warning: me.usageSecs() >= me.totalMeteredStorage, full: me.usageSecs() >= me.totalMeteredStorage }"
           .bar ng-style="{width: me.usageSecs() / me.totalMeteredStorage * 100 + '%'}"
           .meter-words() {{me.usageSecs() | timeCode: 'words'}} / {{me.totalMeteredStorage | timeCode: 'words'}}
