@@ -345,7 +345,11 @@ class Tasks::VoicebaseTranscribeTask < Task
       #STDERR.puts response.pretty_inspect
 
       words = response.words
-      speakers = response.diarization
+      trans.text[:words] = words
+      if ENV['VOICEBASE_API_VERSION'] == '2.0'
+        speakers = response.diarization
+        trans.text[:speakers] = speakers
+      end
 
       speaker_lookup = create_speakers(trans, speakers)
       # iterate through the words 
