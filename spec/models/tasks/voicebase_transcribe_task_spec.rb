@@ -124,7 +124,7 @@ describe Tasks::VoicebaseTranscribeTask do
         "p"=>96,
         "m"=>"punc"}]
       },
-      "speakers"=>
+      "diarization"=>
         [{"speakerLabel"=>"S0", "band"=>"S", "start"=>1950, "length"=>5130, "gender"=>"M", "env"=>"U"},
          {"speakerLabel"=>"S0", "band"=>"S", "start"=>7080, "length"=>8550, "gender"=>"M", "env"=>"U"},
          {"speakerLabel"=>"S11", "band"=>"S", "start"=>15630, "length"=>10710, "gender"=>"M", "env"=>"U"},

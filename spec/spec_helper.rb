@@ -72,7 +72,8 @@ def seed_test_db
 end
 
 def start_es_server
-  Elasticsearch::Extensions::Test::Cluster.start(nodes: 1) unless Elasticsearch::Extensions::Test::Cluster.running?
+  elasticsearch = '/usr/local/bin/elasticsearch-1.5.2/bin/elasticsearch'
+  Elasticsearch::Extensions::Test::Cluster.start(nodes: 1, command: elasticsearch) unless Elasticsearch::Extensions::Test::Cluster.running?
 
   # create index(s) to test against.
   create_es_index(Item)
