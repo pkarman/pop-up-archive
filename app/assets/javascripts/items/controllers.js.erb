@@ -100,11 +100,11 @@ angular.module('Directory.items.controllers', ['Directory.loader', 'Directory.us
     } else if (file.currentStatus == "<%= AudioFile::UPLOAD_FAILED %>") {
       statusHTML += '<p>Something went wrong with your upload. Try re-uploading with a stronger internet connection.</p>';
     } else if (file.currentStatus == "<%= AudioFile::TRANSCRIBE_INPROCESS %>") {
-      statusHTML += "<p>Your Transcript will be ready soon. We'll email you when the full transcript is loaded. ";
+      statusHTML += "<p>Your Transcript will be ready soon. We'll email you when the full transcript is loaded.</p> ";
     } else if (file.currentStatus == "<%= AudioFile::BLANK_EMPTY_FILE %>") {
       statusHTML +="<p>The file has no content.</p>"
     } else if (file.currentStatus == "<%= AudioFile::STUCK %>") {
-      statusHTML += "<p>Your machine transcript is processing in real time (a 30-minute file will take at least 30 minutes). Taking longer than expected?</p><a href='https://popuparchiveorg.zendesk.com/hc/en-us/articles/203658520'>Make sure you're optimizing your upload.</a></p>";
+      statusHTML += "<p>Your machine transcript is processing in real time (a 30-minute file will take at least 30 minutes). Taking longer than expected?</p><p><a href='https://popuparchiveorg.zendesk.com/hc/en-us/articles/203658520'>Make sure you're optimizing your upload.</a></p>";
     } else if (file.currentStatus == "<%= AudioFile::CANCELLED %>") {
       statusHTML += "<p>Something went wrong. Contact us at <a href='mailto:edison@popuparchive.com?subject=Help%20With%20Cancelled%20Audio%20File'>edison@popuparchive.com</a> for support.</p>";
     } else if (file.currentStatus == "<%= AudioFile::ILLEGAL %>") {
