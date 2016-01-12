@@ -260,7 +260,8 @@ class Tasks::VoicebaseTranscribeTask < Task
 
     transcript = nil
     begin
-      transcript = client.transcripts extras['job_id']
+      transcript = vb_job["media"]["transcripts"]["latest"]
+      # transcript = client.transcripts extras['job_id']
     rescue => err
       # if VB throws an error (e.g. 404) we just warn and return
       # since we can't proceed.
@@ -343,14 +344,8 @@ class Tasks::VoicebaseTranscribeTask < Task
       # Voicebase does not currently support speakers w/o clumsy stereo channel assignments,
       # so we do not assign speakers.
       #STDERR.puts response.pretty_inspect
-
-      words = response.words
-      trans.text[:words] = words
-      if ENV['VOICEBASE_API_VERSION'] == '2.0'
-        speakers = response.diarization
-        trans.text[:speakers] = speakers
-      end
-
+      words = response.body.transcript.words
+      speakers = response.body.diarization
       speaker_lookup = create_speakers(trans, speakers)
       # iterate through the words 
       tt = nil # re-use for re-chunking
@@ -388,13 +383,13 @@ class Tasks::VoicebaseTranscribeTask < Task
             tt[:text] += "#{space}#{row['w']}"
           end
 
-          if f (row_end > speaker_end)
-            tt.save
-            speaker_idx += 1
-            speaker = speakers[speaker_idx] ? speakers[speaker_idx] : speakers[prev_speaker] 
-            tt = nil
+          # if (row_end > speaker_end)
+          #   tt.save
+          #   speaker_idx += 1
+          #   speaker = speakers[speaker_idx] ? speakers[speaker_idx] : speakers[prev_speaker] 
+          #   tt = nil
           # end the chunk if we are over 5sec and the next word is not punctuation.
-          elsif (row_end - tt[:start_time]) > 5.0 && (!next_row || !next_row['m'])
+          if (row_end - tt[:start_time]) > 5.0 && (!next_row || !next_row['m'])
             tt[:confidence] = tt_confidences.inject{ |sum, el| sum + el }.to_f / tt_confidences.size
             tt.save
             tt = nil
