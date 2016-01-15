@@ -101,6 +101,7 @@ class Tasks::VoicebaseTranscribeTask < Task
       :id     => ENV['VOICEBASE_AUTH_ID'],
       :secret => ENV['VOICEBASE_AUTH_SECRET'],
       :debug  => ENV['VOICEBASE_DEBUG'],
+      :api_version => ENV['VOICEBASE_API_VERSION'],
     )
     client
   end
