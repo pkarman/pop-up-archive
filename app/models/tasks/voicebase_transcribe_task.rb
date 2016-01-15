@@ -309,8 +309,8 @@ class Tasks::VoicebaseTranscribeTask < Task
   def process_transcript(response)
     trans = nil
     return trans if response.blank? || response.body.blank?
-
-    json = response.body.to_json
+    json = response.to_json
+    # json = response.body.to_json
     identifier = Digest::MD5.hexdigest(json)
 
     if trans = audio_file.transcripts.where(identifier: identifier).first
@@ -344,8 +344,8 @@ class Tasks::VoicebaseTranscribeTask < Task
       # Voicebase does not currently support speakers w/o clumsy stereo channel assignments,
       # so we do not assign speakers.
       #STDERR.puts response.pretty_inspect
-      words = response.body.transcript.words
-      speakers = response.body.diarization
+      words = response.words
+      speakers = response.diarization
       speaker_lookup = create_speakers(trans, speakers)
       # iterate through the words 
       tt = nil # re-use for re-chunking
