@@ -122,6 +122,15 @@ class Tasks::VoicebaseTranscribeTask < Task
   end
   # :nocov:
 
+  def lookup_job_by_id
+    client = self.class.voicebase_client
+    if jid=self.extras['job_id']
+      vb_job = client.get '/media/' + jid
+    else 
+      puts "No job id."
+    end
+  end
+
   def update_premium_transcript_usage(now=DateTime.now)
     billed_user = user
     if !billed_user
