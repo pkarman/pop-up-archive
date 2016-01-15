@@ -308,7 +308,7 @@ class Tasks::VoicebaseTranscribeTask < Task
 
   def process_transcript(response)
     trans = nil
-    return trans if response.blank? || response.body.blank?
+    return trans if response.blank? 
     json = response.to_json
     # json = response.body.to_json
     identifier = Digest::MD5.hexdigest(json)
