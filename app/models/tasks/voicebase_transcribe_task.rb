@@ -417,7 +417,7 @@ class Tasks::VoicebaseTranscribeTask < Task
     speakers_by_name = speakers.inject({}) {|all, s| all.key?(s['speakerLabel']) ? all[s['speakerLabel']] << s : all[s['speakerLabel']] = [s]; all }
     speakers_by_name.keys.each do |n|
       times = speakers_by_name[n].collect{|r| [BigDecimal.new(r['start'].fdiv(1000).to_s), (BigDecimal.new(r['start'].fdiv(1000).to_s) + BigDecimal.new(r['length'].fdiv(1000).to_s))] }
-      speakers_lookup[n] = trans.speakers.create(speakerLabel: n, times: times)
+      speakers_lookup[n] = trans.speakers.create(name: n, times: times)
     end
     speakers_lookup
   end
