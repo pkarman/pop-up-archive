@@ -168,8 +168,9 @@ meta view-head="view-head" property="og:type" content="article"
               |  Here is the transcription of the first two minutes of your audio. The rest will process in real time (a 30-minute file will take at least 30 minutes). We'll email you when it's ready.
             .alert.alert-info ng-show="(audioFile.currentStatus == '#{AudioFile::TRANSCRIPT_SAMPLE_COMPLETE}' || audioFile.currentStatus == '#{AudioFile::TRANSCRIPT_PREVIEW_COMPLETE}') && !currentUser.canEdit(item)"
               | This is a 2-minute basic transcript preview.
-            .alert.alert-info ng-show="audioFile.currentStatus == '#{AudioFile::TRANSCRIPT_PREMIUM_COMPLETE}' && currentUser.hasCommunityPlan && currentUser.canEdit(item)"
-              | Like this transcript? Upgrade your plan for more!
+            .alert.alert-info ng-show="audioFile.currentStatus == '#{AudioFile::TRANSCRIPT_PREMIUM_COMPLETE}' && currentUser.hasCommunityPlan && currentUser.canEdit(item)" 
+              a href="/pricing"
+                | Like this transcript? Upgrade your plan for more!
       .row
         //File processing status
         .col-md-12
