@@ -365,7 +365,8 @@ class Tasks::VoicebaseTranscribeTask < Task
       # m == metadata (flag for punctuation, speaker, etc)
 
         speaker = speakers[speaker_idx]
-        speaker_end = speaker ? (BigDecimal.new(speaker['start'].fdiv(1000).to_s) + BigDecimal.new(speaker['length'].fdiv(1000).to_s)) : row_end
+        # speaker_end = speaker ? (BigDecimal.new(speaker['start'].fdiv(1000).to_s) + BigDecimal.new(speaker['length'].fdiv(1000).to_s)) : row_end
+        speaker_end = speaker ? (BigDecimal.new(speaker['start'].to_s) + BigDecimal.new(speaker['length'].to_s)) : row_end
       # we re-chunk up the individual words into phrases of ~ 5sec
         row_end = BigDecimal.new(row['e'].fdiv(1000).to_s)
         next_row = words[idx+1] ? words[idx+1] : nil
@@ -415,8 +416,12 @@ class Tasks::VoicebaseTranscribeTask < Task
   def create_speakers(trans, speakers)
     speakers_lookup = {}
     speakers_by_name = speakers.inject({}) {|all, s| all.key?(s['speakerLabel']) ? all[s['speakerLabel']] << s : all[s['speakerLabel']] = [s]; all }
+    # speakers_by_name.keys.each do |n|
+    #   times = speakers_by_name[n].collect{|r| [BigDecimal.new(r['start'].fdiv(1000).to_s), (BigDecimal.new(r['start'].fdiv(1000).to_s) + BigDecimal.new(r['length'].fdiv(1000).to_s))] }
+    #   speakers_lookup[n] = trans.speakers.create(name: n, times: times)
+    # end
     speakers_by_name.keys.each do |n|
-      times = speakers_by_name[n].collect{|r| [BigDecimal.new(r['start'].fdiv(1000).to_s), (BigDecimal.new(r['start'].fdiv(1000).to_s) + BigDecimal.new(r['length'].fdiv(1000).to_s))] }
+      times = speakers_by_name[n].collect{|r| [BigDecimal.new(r['start'].to_s), (BigDecimal.new(r['start'].to_s) + BigDecimal.new(r['length'].to_s))] }
       speakers_lookup[n] = trans.speakers.create(name: n, times: times)
     end
     speakers_lookup
