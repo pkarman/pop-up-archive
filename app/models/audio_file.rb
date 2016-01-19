@@ -985,7 +985,7 @@ class AudioFile < ActiveRecord::Base
     files = self.billable_to.audio_files
     tallied_duration = 0
     files.each do |f| 
-      if f.created_at.month == Date.now.month
+      if f.created_at.month == DateTime.now.month
         tallied_duration += f.duration
       end
     end
