@@ -1,13 +1,4 @@
 GIT
-  remote: git://github.com/18F/elasticsearch-rails-ha-gem.git
-  revision: a5af4828e3c688b67911e85ea7cdddcce31885b3
-  specs:
-    elasticsearch-rails-ha (1.0.0)
-      ansi
-      elasticsearch-model
-      elasticsearch-rails
-
-GIT
   remote: git://github.com/PRX/fixer_client.git
   revision: cedbaeef7d1f9dad6ba76ea457f721c7e5ba4239
   specs:
@@ -263,6 +254,10 @@ GEM
       elasticsearch (> 0.4)
       hashie
     elasticsearch-rails (0.1.7)
+    elasticsearch-rails-ha (1.0.2)
+      ansi
+      elasticsearch-model
+      elasticsearch-rails
     elasticsearch-transport (1.0.7)
       faraday
       multi_json
@@ -803,7 +798,7 @@ DEPENDENCIES
   elasticsearch-extensions
   elasticsearch-model (~> 0.1.6)
   elasticsearch-rails (~> 0.1.6)
-  elasticsearch-rails-ha!
+  elasticsearch-rails-ha (~> 1.0.2)
   etagger!
   excon
   factory_girl_rails
